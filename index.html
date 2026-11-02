@@ -4,13 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>2026/12 新竹基金會 - 衣服尺寸線上統計</title>
-  <!-- 引入 Apache ECharts 圖表庫 -->
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
     :root {
       --primary: #2563eb;
       --primary-active: #1d4ed8;
-      --primary-light: #eff6ff;
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --border: #e2e8f0;
@@ -18,165 +16,92 @@
       --text-muted: #64748b;
       --danger: #ef4444;
       --success: #10b981;
-      --radius: 14px;
+      --radius: 12px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang TC", "Microsoft JhengHei", sans-serif; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; }
-
-    /* Container */
     .container { max-width: 1024px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
 
-    /* Top App Bar */
-    .app-header { background: white; padding: 16px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.03); }
-    .app-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px; }
-    .app-title { font-size: 19px; font-weight: 800; color: #0f172a; line-height: 1.3; }
-    .app-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    /* 頂部同步狀態條 */
+    .sync-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+    .sync-status { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; }
+    .dot.green { background: #22c55e; }
+    .dot.yellow { background: #eab308; animation: blink 1s infinite; }
+    @keyframes blink { 50% { opacity: 0.3; } }
 
-    /* Cards */
-    .card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .app-header { background: white; padding: 16px; border-radius: var(--radius); border: 1px solid var(--border); }
+    .app-title { font-size: 19px; font-weight: 800; color: #0f172a; }
+
+    .card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .card-title { font-size: 16px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px; }
 
-    /* Collapsible Garment Spec Section */
-    .toggle-btn { background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #475569; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-    #specContent { display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 14px; }
-    #specContent.show { display: block; }
-    
-    .diagram-container { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-    .spec-table-scroll { width: 100%; overflow-x: auto; margin-top: 10px; -webkit-overflow-scrolling: touch; }
-    .spec-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; min-width: 320px; }
-    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 4px; }
-    .spec-table th { background: #f8fafc; color: #475569; font-weight: 600; }
-    .colors-wrap { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 8px; }
-    .color-pill { display: flex; align-items: center; gap: 4px; font-size: 11px; background: #f8fafc; border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; }
-    .color-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); }
-
-    /* BI Charts (Mobile Friendly) */
+    /* 圖表區 */
     .charts-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
     @media (min-width: 768px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
     .chart-box { width: 100%; height: 280px; }
 
-    /* Mobile-Optimized Input Form */
+    /* 表單元件 */
     .form-label { font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block; }
-    .input-text { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; outline: none; background: #fff; }
-    .input-text:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+    .input-text { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; }
+    .input-text:focus { border-color: var(--primary); }
 
-    /* Size Steppers Grid (拇指友善大按鈕) */
-    .stepper-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+    /* 加減計數器 (Stepper) */
+    .stepper-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
     @media (min-width: 600px) { .stepper-grid { grid-template-columns: repeat(4, 1fr); } }
-    
-    .stepper-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; }
-    .size-tag { font-weight: 800; font-size: 14px; color: #1e293b; width: 34px; }
-    .size-sub { font-size: 10px; color: var(--text-muted); display: block; font-weight: normal; }
-    .stepper-controls { display: flex; align-items: center; gap: 6px; }
-    .btn-step { width: 34px; height: 34px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; font-size: 18px; font-weight: 700; color: #334155; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; }
-    .btn-step:active { background: #e2e8f0; transform: scale(0.92); }
+    .stepper-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; }
+    .size-tag { font-weight: 800; font-size: 14px; }
+    .btn-step { width: 34px; height: 34px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; font-size: 18px; font-weight: 700; cursor: pointer; }
+    .btn-step:active { background: #e2e8f0; }
     .step-val { width: 28px; text-align: center; font-size: 15px; font-weight: 700; color: var(--primary); }
 
-    .form-actions { display: flex; gap: 8px; margin-top: 14px; }
-    .btn { height: 46px; border-radius: 10px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; flex: 1; transition: 0.1s; }
+    .btn { height: 46px; border-radius: 8px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; }
     .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:active { background: var(--primary-active); }
+    .btn-primary:disabled { background: #94a3b8; }
     .btn-secondary { background: #f1f5f9; color: #475569; flex: 0.4; }
 
-    /* Roster Views */
-    /* 1. Mobile Cards View (< 768px) */
+    /* 手機卡片列表 */
     .roster-cards { display: flex; flex-direction: column; gap: 8px; }
     @media (min-width: 768px) { .roster-cards { display: none; } }
+    .person-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .person-top { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 15px; }
+    .chip { font-size: 11px; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 7px; border-radius: 6px; }
+    .notes-box { font-size: 11px; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 6px; font-weight: 600; width: fit-content; }
+    .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; }
+    .btn-sm.del { color: var(--danger); border-color: #fecaca; }
 
-    .person-card { background: #ffffff; border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
-    .person-top { display: flex; justify-content: space-between; align-items: center; }
-    .person-name { font-size: 16px; font-weight: 800; color: #0f172a; }
-    .person-total { font-size: 12px; font-weight: 700; background: var(--primary-light); color: var(--primary); padding: 3px 8px; border-radius: 20px; }
-    .size-chips { display: flex; flex-wrap: wrap; gap: 5px; }
-    .chip { font-size: 11px; font-weight: 700; background: #f1f5f9; color: #334155; padding: 2px 7px; border-radius: 6px; border: 1px solid #e2e8f0; }
-    .chip.has-qty { background: #dbeafe; color: #1e40af; border-color: #bfdbfe; }
-    .notes-box { font-size: 11px; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 6px; font-weight: 600; }
-    .person-actions { display: flex; justify-content: flex-end; gap: 8px; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 2px; }
-    .btn-sm-touch { padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; border: 1px solid var(--border); background: white; color: #334155; }
-    .btn-sm-touch.del { color: var(--danger); border-color: #fecaca; }
-
-    /* 2. Desktop Table View (>= 768px) */
+    /* 電腦表格 */
     .roster-table-wrap { display: none; overflow-x: auto; }
     @media (min-width: 768px) { .roster-table-wrap { display: block; } }
     .desk-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
     .desk-table th, .desk-table td { border: 1px solid var(--border); padding: 8px; }
-    .desk-table th { background: #f8fafc; color: #334155; }
+    .desk-table th { background: #f8fafc; }
 
-    /* Sticky Bottom Quick Bar for Mobile */
-    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-    .bottom-info { display: flex; flex-direction: column; }
-    .bottom-total { font-size: 18px; font-weight: 800; color: var(--primary); }
-    .bottom-sub { font-size: 11px; color: var(--text-muted); }
-    .bottom-actions { display: flex; gap: 8px; }
-    .btn-round { padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; }
+    /* 底部總計常駐列 */
+    .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
   </style>
 </head>
 <body>
 
 <div class="container">
 
-  <!-- Header -->
+  <!-- 雲端同步狀態顯示條 -->
+  <div class="sync-bar">
+    <div class="sync-status">
+      <span class="dot" id="syncDot"></span>
+      <span id="syncText">正在連線 Google 雲端試算表...</span>
+    </div>
+    <button class="btn-sm" onclick="loadFromCloud()">🔄 重新整理</button>
+  </div>
+
   <div class="app-header">
-    <span class="app-badge">2026/12 新竹基金會</span>
-    <h1 class="app-title">POLO衫尺寸統計與登記表</h1>
-    <p class="app-desc">手機觸控優化版 · 支援離線保存、即時雙 BI 圖表與一鍵匯出</p>
+    <h1 class="app-title">2026/12 新竹基金會 - 衣服尺寸線上統計</h1>
   </div>
 
-  <!-- 衣服圖形與長寬尺寸表 (可收摺手風琴設計，節省手機垂直空間) -->
-  <div class="card">
-    <div class="card-header" style="margin-bottom:0;">
-      <div class="card-title">📐 衣服長寬圖形與色卡</div>
-      <button class="toggle-btn" onclick="toggleSpec()" id="specToggleBtn">展開對照表 ▾</button>
-    </div>
-    
-    <div id="specContent">
-      <div class="diagram-container">
-        <!-- 向量衣服長寬指標圖形 -->
-        <svg width="240" height="180" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">
-          <path d="M 100,45 L 130,50 L 160,65 L 190,50 L 220,45 L 285,85 L 255,120 L 225,108 L 225,215 L 95,215 L 95,108 L 65,120 L 35,85 Z" fill="#f1f5f9" stroke="#334155" stroke-width="2.5" stroke-linejoin="round"/>
-          <path d="M 130,50 L 160,85 L 190,50" fill="none" stroke="#334155" stroke-width="2"/>
-          <path d="M 148,85 L 172,85 L 172,130 L 148,130 Z" fill="#e2e8f0" stroke="#334155" stroke-width="1.5"/>
-          <!-- 肩寬 -->
-          <line x1="100" y1="32" x2="220" y2="32" stroke="#16a34a" stroke-width="2" stroke-dasharray="3,3"/>
-          <text x="160" y="26" fill="#16a34a" font-size="12" font-weight="bold" text-anchor="middle">肩寬 (Shoulder)</text>
-          <!-- 胸圍 -->
-          <line x1="95" y1="115" x2="225" y2="115" stroke="#2563eb" stroke-width="2" stroke-dasharray="3,3"/>
-          <text x="160" y="110" fill="#2563eb" font-size="12" font-weight="bold" text-anchor="middle">胸圍 (腋下左右)</text>
-          <!-- 身長 -->
-          <line x1="238" y1="45" x2="238" y2="215" stroke="#ea580c" stroke-width="2" stroke-dasharray="3,3"/>
-          <text x="275" y="135" fill="#ea580c" font-size="11" font-weight="bold" text-anchor="middle">身長</text>
-        </svg>
-
-        <!-- 6 色卡 -->
-        <div class="colors-wrap">
-          <div class="color-pill"><span class="color-dot" style="background:#111;"></span>001黑</div>
-          <div class="color-pill"><span class="color-dot" style="background:#fff;"></span>005白</div>
-          <div class="color-pill"><span class="color-dot" style="background:#be123c;"></span>010玫瑰紅</div>
-          <div class="color-pill"><span class="color-dot" style="background:#1e293b;"></span>013木暗丈青</div>
-          <div class="color-pill"><span class="color-dot" style="background:#ec4899;"></span>015敏銳桃紅</div>
-          <div class="color-pill"><span class="color-dot" style="background:#0284c7;"></span>017湖藍</div>
-        </div>
-
-        <!-- 規格尺寸表 -->
-        <div class="spec-table-scroll">
-          <table class="spec-table">
-            <thead>
-              <tr><th>尺寸(cm)</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2L</th><th>3L</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><strong>身長</strong></td><td>58</td><td>62</td><td>67</td><td>70</td><td>73</td><td>76</td><td>79</td></tr>
-              <tr><td><strong>胸圍</strong></td><td>42</td><td>46</td><td>50</td><td>53</td><td>56</td><td>60</td><td>64</td></tr>
-              <tr><td><strong>肩寬</strong></td><td>39</td><td>40</td><td>42</td><td>44</td><td>47</td><td>48</td><td>51</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- BI 統計圖表 (手機直向流暢檢視) -->
+  <!-- BI 圖表 -->
   <div class="charts-grid">
     <div class="card">
       <div class="card-title">🥧 圓餅圖 (各尺寸佔比)</div>
@@ -188,117 +113,50 @@
     </div>
   </div>
 
-  <!-- 手機觸控輸入專用表單 (大按鈕加減器) -->
+  <!-- 輸入表單 -->
   <div class="card" id="formCard">
     <div class="card-title" id="formTitle">✏️ 登記與修改尺寸</div>
     <form id="orderForm" onsubmit="saveEntry(event)">
       <input type="hidden" id="editIndex" value="-1">
-      
-      <div style="margin-top: 10px;">
+      <div style="margin-top: 8px;">
         <label class="form-label" for="name">人員姓名 / 單位代稱 *</label>
-        <input type="text" id="name" class="input-text" placeholder="例如：鄭勝月、台北組" required>
+        <input type="text" id="name" class="input-text" placeholder="例如：鄭勝月、大舅" required>
       </div>
 
-      <div style="margin-top: 12px;">
-        <label class="form-label">選擇各尺寸件數 (點擊 ＋ / －)</label>
+      <div style="margin-top: 10px;">
+        <label class="form-label">選擇各尺寸件數</label>
         <div class="stepper-grid">
-          
-          <!-- XS -->
-          <div class="stepper-item">
-            <div><span class="size-tag">XS</span><span class="size-sub">胸42/長58</span></div>
-            <div class="stepper-controls">
-              <button type="button" class="btn-step" onclick="changeQty('xs', -1)">−</button>
-              <span class="step-val" id="disp_xs">0</span>
-              <button type="button" class="btn-step" onclick="changeQty('xs', 1)">+</button>
-            </div>
-          </div>
-
-          <!-- S -->
-          <div class="stepper-item">
-            <div><span class="size-tag">S</span><span class="size-sub">胸46/長62</span></div>
-            <div class="stepper-controls">
-              <button type="button" class="btn-step" onclick="changeQty('s', -1)">−</button>
-              <span class="step-val" id="disp_s">0</span>
-              <button type="button" class="btn-step" onclick="changeQty('s', 1)">+</button>
-            </div>
-          </div>
-
-          <!-- M -->
-          <div class="stepper-item">
-            <div><span class="size-tag">M</span><span class="size-sub">胸50/長67</span></div>
-            <div class="stepper-controls">
-              <button type="button" class="btn-step" onclick="changeQty('m', -1)">−</button>
-              <span class="step-val" id="disp_m">0</span>
-              <button type="button" class="btn-step" onclick="changeQty('m', 1)">+</button>
-            </div>
-          </div>
-
-          <!-- L -->
-          <div class="stepper-item">
-            <div><span class="size-tag">L</span><span class="size-sub">胸53/長70</span></div>
-            <div class="stepper-controls">
-              <button type="button" class="btn-step" onclick="changeQty('l', -1)">−</button>
-              <span class="step-val" id="disp_l">0</span>
-              <button type="button" class="btn-step" onclick="changeQty('l', 1)">+</button>
-            </div>
-          </div>
-
-          <!-- XL -->
-          <div class="stepper-item">
-            <div><span class="size-tag">XL</span><span class="size-sub">胸56/長73</span></div>
-            <div class="stepper-controls">
-              <button type="button" class="btn-step" onclick="changeQty('xl', -1)">−</button>
-              <span class="step-val" id="disp_xl">0</span>
-              <button type="button" class="btn-step" onclick="changeQty('xl', 1)">+</button>
-            </div>
-          </div>
-
-          <!-- 2L -->
-          <div class="stepper-item">
-            <div><span class="size-tag">2L</span><span class="size-sub">胸60/長76</span></div>
-            <div class="stepper-controls">
-              <button type="button" class="btn-step" onclick="changeQty('l2', -1)">−</button>
-              <span class="step-val" id="disp_l2">0</span>
-              <button type="button" class="btn-step" onclick="changeQty('l2', 1)">+</button>
-            </div>
-          </div>
-
-          <!-- 3L -->
-          <div class="stepper-item">
-            <div><span class="size-tag">3L</span><span class="size-sub">胸64/長79</span></div>
-            <div class="stepper-controls">
-              <button type="button" class="btn-step" onclick="changeQty('l3', -1)">−</button>
-              <span class="step-val" id="disp_l3">0</span>
-              <button type="button" class="btn-step" onclick="changeQty('l3', 1)">+</button>
-            </div>
-          </div>
-
+          <div class="stepper-item"><span class="size-tag">XS</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('xs', -1)">−</button><span class="step-val" id="disp_xs">0</span><button type="button" class="btn-step" onclick="changeQty('xs', 1)">+</button></div></div>
+          <div class="stepper-item"><span class="size-tag">S</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('s', -1)">−</button><span class="step-val" id="disp_s">0</span><button type="button" class="btn-step" onclick="changeQty('s', 1)">+</button></div></div>
+          <div class="stepper-item"><span class="size-tag">M</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('m', -1)">−</button><span class="step-val" id="disp_m">0</span><button type="button" class="btn-step" onclick="changeQty('m', 1)">+</button></div></div>
+          <div class="stepper-item"><span class="size-tag">L</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('l', -1)">−</button><span class="step-val" id="disp_l">0</span><button type="button" class="btn-step" onclick="changeQty('l', 1)">+</button></div></div>
+          <div class="stepper-item"><span class="size-tag">XL</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('xl', -1)">−</button><span class="step-val" id="disp_xl">0</span><button type="button" class="btn-step" onclick="changeQty('xl', 1)">+</button></div></div>
+          <div class="stepper-item"><span class="size-tag">2L</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('l2', -1)">−</button><span class="step-val" id="disp_l2">0</span><button type="button" class="btn-step" onclick="changeQty('l2', 1)">+</button></div></div>
+          <div class="stepper-item"><span class="size-tag">3L</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('l3', -1)">−</button><span class="step-val" id="disp_l3">0</span><button type="button" class="btn-step" onclick="changeQty('l3', 1)">+</button></div></div>
         </div>
       </div>
 
-      <div style="margin-top: 12px;">
+      <div style="margin-top: 10px;">
         <label class="form-label" for="notes">備註說明 (選填)</label>
-        <input type="text" id="notes" class="input-text" placeholder="例如：女生版型 L1、XS1">
+        <input type="text" id="notes" class="input-text" placeholder="例如：女款 L1 KL1">
       </div>
 
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary" id="submitBtn">確認儲存</button>
+      <div style="display: flex; gap: 8px; margin-top: 12px;">
+        <button type="submit" class="btn btn-primary" id="submitBtn">儲存並同步至雲端</button>
         <button type="button" class="btn btn-secondary" id="cancelBtn" onclick="resetForm()" style="display:none;">取消</button>
       </div>
     </form>
   </div>
 
-  <!-- 名冊列表：手機顯示「卡片式」、電腦自動切換為「大表格」 -->
+  <!-- 名冊 -->
   <div class="card">
     <div class="card-header">
       <div class="card-title">📋 登記名冊明細 (<span id="peopleCount">0</span>人)</div>
-      <button class="toggle-btn" onclick="exportToCSV()">📥 匯出 Excel</button>
+      <button class="btn-sm" onclick="exportToCSV()">📥 匯出 Excel</button>
     </div>
-
-    <!-- 手機卡片列表 (< 768px) -->
+    <!-- 手機卡片 -->
     <div class="roster-cards" id="mobileCards"></div>
-
-    <!-- 電腦版完整表格 (>= 768px) -->
+    <!-- 電腦表格 -->
     <div class="roster-table-wrap">
       <table class="desk-table">
         <thead>
@@ -314,23 +172,24 @@
 
 </div>
 
-<!-- 手機底部常駐總計列 -->
+<!-- 底部固定條 -->
 <div class="bottom-bar">
-  <div class="bottom-info">
-    <div class="bottom-total">總計 <span id="statBottomTotal">0</span> 件</div>
-    <div class="bottom-sub" id="statBottomSummary">L:0 / XL:0 / M:0...</div>
+  <div>
+    <div style="font-size:17px;font-weight:800;color:var(--primary);">總計 <span id="statBottomTotal">0</span> 件</div>
+    <div style="font-size:11px;color:var(--text-muted);" id="statBottomSummary">L:0 / XL:0...</div>
   </div>
-  <div class="bottom-actions">
-    <button class="btn-round" style="background:var(--primary); color:white;" onclick="scrollToForm()">＋ 立即登記</button>
-  </div>
+  <button style="padding:8px 16px;background:var(--primary);color:white;border-radius:20px;border:none;font-weight:700;" onclick="scrollToForm()">＋ 立即登記</button>
 </div>
 
 <script>
-// 預置原登記表名單
+// ⭐ 請將此處替換為您在第一步取得的 Google Apps Script 網頁應用程式網址：
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+
+// 備用初始名單
 const defaultData = [
-  { name: "鄭萬來", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "鄭勝月", xs: 0, s: 0, m: 0, l: 1, xl: 2, l2: 0, l3: 0, notes: "L1 KL1" },
-  { name: "葉乾慶", xs: 0, s: 0, m: 0, l: 0, xl: 2, l2: 1, l3: 4, notes: "XS1 M1 S2" },
+  { name: "大舅", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "大阿姨", xs: 0, s: 0, m: 0, l: 1, xl: 2, l2: 0, l3: 0, notes: "L1 KL1" },
+  { name: "二阿姨", xs: 0, s: 0, m: 0, l: 0, xl: 2, l2: 1, l3: 4, notes: "XS1 M1 S2" },
   { name: "鄭美月", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "M1" },
   { name: "鄭滿月", xs: 0, s: 0, m: 0, l: 1, xl: 1, l2: 0, l3: 0, notes: "M1 XS2" },
   { name: "鄭渭月", xs: 2, s: 3, m: 2, l: 1, xl: 3, l2: 1, l3: 0, notes: "" },
@@ -350,16 +209,80 @@ const defaultData = [
   { name: "台北",   xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" }
 ];
 
-const STORAGE_KEY = "polo_mobile_hsinchu_2026";
-let records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
-
-// 表單尺寸暫存數值
+let records = JSON.parse(localStorage.getItem("polo_backup")) || defaultData;
 let formSizes = { xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0 };
 
-// 初始化 ECharts
 const pieChart = echarts.init(document.getElementById('pieChart'));
 const roseChart = echarts.init(document.getElementById('roseChart'));
 const colors = ['#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+
+function setSyncStatus(state, msg) {
+  const dot = document.getElementById("syncDot");
+  const txt = document.getElementById("syncText");
+  dot.className = "dot " + (state === "ok" ? "green" : state === "syncing" ? "yellow" : "");
+  txt.innerText = msg;
+}
+
+// 從 Google 試算表載入最新資料
+async function loadFromCloud() {
+  if (GOOGLE_SCRIPT_URL.includes("YOUR_SCRIPT_ID")) {
+    setSyncStatus("fail", "尚未設定 Google Apps Script 網址 (目前使用本機模式)");
+    render();
+    return;
+  }
+  setSyncStatus("syncing", "正在同步 Google 雲端資料...");
+  try {
+    const res = await fetch(GOOGLE_SCRIPT_URL);
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      records = data.map(item => ({
+        name: item.name || "",
+        xs: Number(item.xs) || 0,
+        s: Number(item.s) || 0,
+        m: Number(item.m) || 0,
+        l: Number(item.l) || 0,
+        xl: Number(item.xl) || 0,
+        l2: Number(item.l2) || 0,
+        l3: Number(item.l3) || 0,
+        notes: item.notes || ""
+      }));
+      localStorage.setItem("polo_backup", JSON.stringify(records));
+      setSyncStatus("ok", "🟢 已成功連線 Google 試算表（最新）");
+    } else {
+      // 雲端試算表尚無資料，把預設資料存上去
+      await syncToCloud();
+    }
+  } catch (err) {
+    console.error(err);
+    setSyncStatus("fail", "連線失敗，使用離線快取資料");
+  }
+  render();
+}
+
+// 寫入 Google 試算表
+async function syncToCloud() {
+  if (GOOGLE_SCRIPT_URL.includes("YOUR_SCRIPT_ID")) {
+    localStorage.setItem("polo_backup", JSON.stringify(records));
+    return;
+  }
+  setSyncStatus("syncing", "正在寫入 Google 雲端試算表...");
+  document.getElementById("submitBtn").disabled = true;
+  try {
+    await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(records)
+    });
+    localStorage.setItem("polo_backup", JSON.stringify(records));
+    setSyncStatus("ok", "🟢 已儲存並同步至 Google 試算表");
+  } catch (err) {
+    alert("雲端同步異常，請檢查網路連線");
+    setSyncStatus("fail", "同步失敗");
+  } finally {
+    document.getElementById("submitBtn").disabled = false;
+  }
+}
 
 function changeQty(key, delta) {
   formSizes[key] = Math.max(0, formSizes[key] + delta);
@@ -369,18 +292,6 @@ function changeQty(key, delta) {
 function setFormQty(key, val) {
   formSizes[key] = Math.max(0, val || 0);
   document.getElementById(`disp_${key}`).innerText = formSizes[key];
-}
-
-function toggleSpec() {
-  const content = document.getElementById("specContent");
-  const btn = document.getElementById("specToggleBtn");
-  if (content.classList.contains("show")) {
-    content.classList.remove("show");
-    btn.innerText = "展開對照表 ▾";
-  } else {
-    content.classList.add("show");
-    btn.innerText = "收合對照表 ▴";
-  }
 }
 
 function updateCharts(stats) {
@@ -394,44 +305,25 @@ function updateCharts(stats) {
     { name: '3L', value: stats.l3 }
   ].filter(d => d.value > 0);
 
-  // 圓餅圖
   pieChart.setOption({
     color: colors,
     tooltip: { trigger: 'item', formatter: '{b}: {c}件 ({d}%)' },
     series: [{
       type: 'pie',
       radius: ['32%', '65%'],
-      center: ['50%', '50%'],
-      avoidLabelOverlap: true,
-      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
-      label: {
-        show: true,
-        formatter: '{b}: {c}件\n({d}%)',
-        fontSize: 11,
-        fontWeight: 'bold'
-      },
-      labelLine: { length: 8, length2: 6 },
+      label: { show: true, formatter: '{b}: {c}件\n({d}%)', fontSize: 11, fontWeight: 'bold' },
       data: chartData
     }]
   });
 
-  // 南丁格爾玫瑰圖
   roseChart.setOption({
     color: colors,
-    tooltip: { trigger: 'item', formatter: '{b}: {c}件 ({d}%)' },
+    tooltip: { trigger: 'item', formatter: '{b}: {c}件' },
     series: [{
       type: 'pie',
       radius: ['18%', '68%'],
-      center: ['50%', '50%'],
       roseType: 'radius',
-      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
-      label: {
-        show: true,
-        formatter: '{b}\n{c}件',
-        fontSize: 11,
-        fontWeight: 'bold'
-      },
-      labelLine: { length: 6, length2: 6 },
+      label: { show: true, formatter: '{b}\n{c}件', fontSize: 11, fontWeight: 'bold' },
       data: chartData
     }]
   });
@@ -458,36 +350,30 @@ function render() {
     stats.l2 += (row.l2 || 0);
     stats.l3 += (row.l3 || 0);
 
-    // 1. 生成手機卡片
+    // 手機卡片
+    let chips = "";
+    ['xs','s','m','l','xl','l2','l3'].forEach((k, i) => {
+      const lbl = ['XS','S','M','L','XL','2L','3L'][i];
+      if (row[k] > 0) chips += `<span class="chip">${lbl}: ${row[k]}</span> `;
+    });
+
     const card = document.createElement("div");
     card.className = "person-card";
-    
-    // 生成已選尺寸膠囊標籤
-    let sizeChipsHtml = "";
-    const sizeKeys = ['xs','s','m','l','xl','l2','l3'];
-    const sizeLabels = ['XS','S','M','L','XL','2L','3L'];
-    sizeKeys.forEach((k, i) => {
-      if (row[k] > 0) {
-        sizeChipsHtml += `<span class="chip has-qty">${sizeLabels[i]}: ${row[k]}</span>`;
-      }
-    });
-    if (!sizeChipsHtml) sizeChipsHtml = `<span class="chip" style="color:#94a3b8;">未登記件數</span>`;
-
     card.innerHTML = `
       <div class="person-top">
-        <span class="person-name">${idx + 1}. ${escapeHtml(row.name)}</span>
-        <span class="person-total">${rowTotal > 0 ? `共 ${rowTotal} 件` : '0 件'}</span>
+        <span>${idx + 1}. ${escapeHtml(row.name)}</span>
+        <span style="color:var(--primary); font-size:13px;">${rowTotal > 0 ? `共 ${rowTotal} 件` : '未登記'}</span>
       </div>
-      <div class="size-chips">${sizeChipsHtml}</div>
+      <div>${chips || '<span style="color:#94a3b8;font-size:12px;">無尺寸資料</span>'}</div>
       ${row.notes ? `<div class="notes-box">備註：${escapeHtml(row.notes)}</div>` : ''}
-      <div class="person-actions">
-        <button class="btn-sm-touch" onclick="editRow(${idx})">✏️ 修改</button>
-        <button class="btn-sm-touch del" onclick="deleteRow(${idx})">🗑️ 刪除</button>
+      <div class="actions">
+        <button class="btn-sm" onclick="editRow(${idx})">✏️ 修改</button>
+        <button class="btn-sm del" onclick="deleteRow(${idx})">🗑️ 刪除</button>
       </div>
     `;
     mobileContainer.appendChild(card);
 
-    // 2. 生成電腦版表格列
+    // 電腦表格
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${idx + 1}</td>
@@ -497,47 +383,40 @@ function render() {
       <td style="font-weight:800; color:var(--primary);">${rowTotal || "-"}</td>
       <td>${row.notes ? `<span class="notes-box">${escapeHtml(row.notes)}</span>` : ""}</td>
       <td>
-        <button class="btn-sm-touch" onclick="editRow(${idx})">修改</button>
-        <button class="btn-sm-touch del" onclick="deleteRow(${idx})">刪除</button>
+        <button class="btn-sm" onclick="editRow(${idx})">修改</button>
+        <button class="btn-sm del" onclick="deleteRow(${idx})">刪除</button>
       </td>
     `;
     deskTbody.appendChild(tr);
   });
 
-  // 更新常駐底部總計列
   document.getElementById("statBottomTotal").innerText = totalCount;
   document.getElementById("statBottomSummary").innerText = `L:${stats.l} / XL:${stats.xl} / M:${stats.m} / 2L:${stats.l2}`;
   document.getElementById("peopleCount").innerText = records.length;
 
-  // 更新圖表
   updateCharts(stats);
 }
 
-function saveEntry(e) {
+async function saveEntry(e) {
   e.preventDefault();
   const editIdx = parseInt(document.getElementById("editIndex").value);
 
   const entry = {
     name: document.getElementById("name").value.trim(),
-    xs: formSizes.xs,
-    s:  formSizes.s,
-    m:  formSizes.m,
-    l:  formSizes.l,
-    xl: formSizes.xl,
-    l2: formSizes.l2,
-    l3: formSizes.l3,
+    xs: formSizes.xs, s: formSizes.s, m: formSizes.m, l: formSizes.l,
+    xl: formSizes.xl, l2: formSizes.l2, l3: formSizes.l3,
     notes: document.getElementById("notes").value.trim()
   };
 
   if (editIdx >= 0) {
     records[editIdx] = entry;
   } else {
-    records.unshift(entry); // 新增放最前面，手機體驗更好
+    records.unshift(entry);
   }
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
   render();
   resetForm();
+  await syncToCloud();
 }
 
 function editRow(index) {
@@ -545,13 +424,11 @@ function editRow(index) {
   document.getElementById("editIndex").value = index;
   document.getElementById("name").value = row.name;
   document.getElementById("notes").value = row.notes || "";
-
   ['xs','s','m','l','xl','l2','l3'].forEach(k => setFormQty(k, row[k]));
 
   document.getElementById("formTitle").innerText = `✏️ 正在修改：${row.name}`;
-  document.getElementById("submitBtn").innerText = "更新資料";
+  document.getElementById("submitBtn").innerText = "確認修改並同步";
   document.getElementById("cancelBtn").style.display = "block";
-
   scrollToForm();
 }
 
@@ -559,17 +436,16 @@ function resetForm() {
   document.getElementById("orderForm").reset();
   document.getElementById("editIndex").value = -1;
   document.getElementById("formTitle").innerText = "✏️ 登記與修改尺寸";
-  document.getElementById("submitBtn").innerText = "確認儲存";
+  document.getElementById("submitBtn").innerText = "儲存並同步至雲端";
   document.getElementById("cancelBtn").style.display = "none";
   ['xs','s','m','l','xl','l2','l3'].forEach(k => setFormQty(k, 0));
 }
 
-function deleteRow(index) {
-  if (confirm(`確定要刪除「${records[index].name}」的紀錄嗎？`)) {
+async function deleteRow(index) {
+  if (confirm(`確定要刪除「${records[index].name}」嗎？此動作將同步至雲端。`)) {
     records.splice(index, 1);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     render();
-    resetForm();
+    await syncToCloud();
   }
 }
 
@@ -600,8 +476,8 @@ window.addEventListener('resize', () => {
   roseChart.resize();
 });
 
-// 初次渲染
-render();
+// 開啟網頁時自動抓取 Google 雲端試算表
+loadFromCloud();
 </script>
 
 </body>
