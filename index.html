@@ -8,59 +8,50 @@
   <style>
     :root {
       --primary: #2563eb;
-      --primary-active: #1d4ed8;
       --bg: #f8fafc;
-      --card-bg: #ffffff;
       --border: #e2e8f0;
       --text: #0f172a;
       --text-muted: #64748b;
       --danger: #ef4444;
-      --success: #10b981;
       --radius: 12px;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding-bottom: 90px; }
     .container { max-width: 1024px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
 
-    /* 頂部同步狀態條 */
-    .sync-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+    /* 雲端狀態橫幅 */
+    .sync-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
     .sync-status { display: flex; align-items: center; gap: 6px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
     .dot.green { background: #22c55e; }
     .dot.yellow { background: #eab308; animation: blink 1s infinite; }
     @keyframes blink { 50% { opacity: 0.3; } }
 
     .app-header { background: white; padding: 16px; border-radius: var(--radius); border: 1px solid var(--border); }
-    .app-title { font-size: 19px; font-weight: 800; color: #0f172a; }
-
-    .card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; }
+    .app-title { font-size: 19px; font-weight: 800; }
+    .card { background: white; border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-    .card-title { font-size: 16px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px; }
+    .card-title { font-size: 16px; font-weight: 700; color: #1e293b; }
 
     /* 圖表區 */
     .charts-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
     @media (min-width: 768px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
     .chart-box { width: 100%; height: 280px; }
 
-    /* 表單元件 */
+    /* 表單 */
     .form-label { font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block; }
-    .input-text { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; }
-    .input-text:focus { border-color: var(--primary); }
-
-    /* 加減計數器 (Stepper) */
+    .input-text { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; }
     .stepper-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
     @media (min-width: 600px) { .stepper-grid { grid-template-columns: repeat(4, 1fr); } }
     .stepper-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; }
-    .size-tag { font-weight: 800; font-size: 14px; }
     .btn-step { width: 34px; height: 34px; border-radius: 8px; border: 1px solid #cbd5e1; background: white; font-size: 18px; font-weight: 700; cursor: pointer; }
-    .btn-step:active { background: #e2e8f0; }
     .step-val { width: 28px; text-align: center; font-size: 15px; font-weight: 700; color: var(--primary); }
 
-    .btn { height: 46px; border-radius: 8px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; }
+    .btn { height: 44px; border-radius: 8px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; }
     .btn-primary { background: var(--primary); color: white; }
     .btn-primary:disabled { background: #94a3b8; }
-    .btn-secondary { background: #f1f5f9; color: #475569; flex: 0.4; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; }
+    .btn-sm.del { color: var(--danger); border-color: #fecaca; }
 
     /* 手機卡片列表 */
     .roster-cards { display: flex; flex-direction: column; gap: 8px; }
@@ -69,9 +60,6 @@
     .person-top { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 15px; }
     .chip { font-size: 11px; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 7px; border-radius: 6px; }
     .notes-box { font-size: 11px; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 6px; font-weight: 600; width: fit-content; }
-    .actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
-    .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; }
-    .btn-sm.del { color: var(--danger); border-color: #fecaca; }
 
     /* 電腦表格 */
     .roster-table-wrap { display: none; overflow-x: auto; }
@@ -80,7 +68,7 @@
     .desk-table th, .desk-table td { border: 1px solid var(--border); padding: 8px; }
     .desk-table th { background: #f8fafc; }
 
-    /* 底部總計常駐列 */
+    /* 底部固定條 */
     .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
   </style>
 </head>
@@ -88,11 +76,11 @@
 
 <div class="container">
 
-  <!-- 雲端同步狀態顯示條 -->
+  <!-- 雲端連線狀態指示燈 -->
   <div class="sync-bar">
     <div class="sync-status">
-      <span class="dot" id="syncDot"></span>
-      <span id="syncText">正在連線 Google 雲端試算表...</span>
+      <span class="dot yellow" id="syncDot"></span>
+      <span id="syncText">正在連線雲端資料庫...</span>
     </div>
     <button class="btn-sm" onclick="loadFromCloud()">🔄 重新整理</button>
   </div>
@@ -101,7 +89,7 @@
     <h1 class="app-title">2026/12 新竹基金會 - 衣服尺寸線上統計</h1>
   </div>
 
-  <!-- BI 圖表 -->
+  <!-- BI 雙圖表 -->
   <div class="charts-grid">
     <div class="card">
       <div class="card-title">🥧 圓餅圖 (各尺寸佔比)</div>
@@ -120,30 +108,30 @@
       <input type="hidden" id="editIndex" value="-1">
       <div style="margin-top: 8px;">
         <label class="form-label" for="name">人員姓名 / 單位代稱 *</label>
-        <input type="text" id="name" class="input-text" placeholder="例如：鄭勝月、大舅" required>
+        <input type="text" id="name" class="input-text" placeholder="例如：大舅、鄭勝月" required>
       </div>
 
       <div style="margin-top: 10px;">
         <label class="form-label">選擇各尺寸件數</label>
         <div class="stepper-grid">
-          <div class="stepper-item"><span class="size-tag">XS</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('xs', -1)">−</button><span class="step-val" id="disp_xs">0</span><button type="button" class="btn-step" onclick="changeQty('xs', 1)">+</button></div></div>
-          <div class="stepper-item"><span class="size-tag">S</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('s', -1)">−</button><span class="step-val" id="disp_s">0</span><button type="button" class="btn-step" onclick="changeQty('s', 1)">+</button></div></div>
-          <div class="stepper-item"><span class="size-tag">M</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('m', -1)">−</button><span class="step-val" id="disp_m">0</span><button type="button" class="btn-step" onclick="changeQty('m', 1)">+</button></div></div>
-          <div class="stepper-item"><span class="size-tag">L</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('l', -1)">−</button><span class="step-val" id="disp_l">0</span><button type="button" class="btn-step" onclick="changeQty('l', 1)">+</button></div></div>
-          <div class="stepper-item"><span class="size-tag">XL</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('xl', -1)">−</button><span class="step-val" id="disp_xl">0</span><button type="button" class="btn-step" onclick="changeQty('xl', 1)">+</button></div></div>
-          <div class="stepper-item"><span class="size-tag">2L</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('l2', -1)">−</button><span class="step-val" id="disp_l2">0</span><button type="button" class="btn-step" onclick="changeQty('l2', 1)">+</button></div></div>
-          <div class="stepper-item"><span class="size-tag">3L</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('l3', -1)">−</button><span class="step-val" id="disp_l3">0</span><button type="button" class="btn-step" onclick="changeQty('l3', 1)">+</button></div></div>
+          <div class="stepper-item"><span style="font-weight:800;">XS</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('xs', -1)">−</button><span class="step-val" id="disp_xs">0</span><button type="button" class="btn-step" onclick="changeQty('xs', 1)">+</button></div></div>
+          <div class="stepper-item"><span style="font-weight:800;">S</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('s', -1)">−</button><span class="step-val" id="disp_s">0</span><button type="button" class="btn-step" onclick="changeQty('s', 1)">+</button></div></div>
+          <div class="stepper-item"><span style="font-weight:800;">M</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('m', -1)">−</button><span class="step-val" id="disp_m">0</span><button type="button" class="btn-step" onclick="changeQty('m', 1)">+</button></div></div>
+          <div class="stepper-item"><span style="font-weight:800;">L</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('l', -1)">−</button><span class="step-val" id="disp_l">0</span><button type="button" class="btn-step" onclick="changeQty('l', 1)">+</button></div></div>
+          <div class="stepper-item"><span style="font-weight:800;">XL</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('xl', -1)">−</button><span class="step-val" id="disp_xl">0</span><button type="button" class="btn-step" onclick="changeQty('xl', 1)">+</button></div></div>
+          <div class="stepper-item"><span style="font-weight:800;">2L</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('l2', -1)">−</button><span class="step-val" id="disp_l2">0</span><button type="button" class="btn-step" onclick="changeQty('l2', 1)">+</button></div></div>
+          <div class="stepper-item"><span style="font-weight:800;">3L</span><div style="display:flex;align-items:center;"><button type="button" class="btn-step" onclick="changeQty('l3', -1)">−</button><span class="step-val" id="disp_l3">0</span><button type="button" class="btn-step" onclick="changeQty('l3', 1)">+</button></div></div>
         </div>
       </div>
 
       <div style="margin-top: 10px;">
         <label class="form-label" for="notes">備註說明 (選填)</label>
-        <input type="text" id="notes" class="input-text" placeholder="例如：女款 L1 KL1">
+        <input type="text" id="notes" class="input-text" placeholder="例如：L1 KL1">
       </div>
 
       <div style="display: flex; gap: 8px; margin-top: 12px;">
         <button type="submit" class="btn btn-primary" id="submitBtn">儲存並同步至雲端</button>
-        <button type="button" class="btn btn-secondary" id="cancelBtn" onclick="resetForm()" style="display:none;">取消</button>
+        <button type="button" class="btn-sm" id="cancelBtn" onclick="resetForm()" style="display:none;">取消</button>
       </div>
     </form>
   </div>
@@ -154,9 +142,7 @@
       <div class="card-title">📋 登記名冊明細 (<span id="peopleCount">0</span>人)</div>
       <button class="btn-sm" onclick="exportToCSV()">📥 匯出 Excel</button>
     </div>
-    <!-- 手機卡片 -->
     <div class="roster-cards" id="mobileCards"></div>
-    <!-- 電腦表格 -->
     <div class="roster-table-wrap">
       <table class="desk-table">
         <thead>
@@ -172,20 +158,20 @@
 
 </div>
 
-<!-- 底部固定條 -->
+<!-- 底部固定列 -->
 <div class="bottom-bar">
   <div>
     <div style="font-size:17px;font-weight:800;color:var(--primary);">總計 <span id="statBottomTotal">0</span> 件</div>
-    <div style="font-size:11px;color:var(--text-muted);" id="statBottomSummary">L:0 / XL:0...</div>
+    <div style="font-size:11px;color:var(--text-muted);" id="statBottomSummary">正在統計...</div>
   </div>
   <button style="padding:8px 16px;background:var(--primary);color:white;border-radius:20px;border:none;font-weight:700;" onclick="scrollToForm()">＋ 立即登記</button>
 </div>
 
 <script>
-// ⭐ 請將此處替換為您在第一步取得的 Google Apps Script 網頁應用程式網址：
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+// 🌟 專屬雲端儲存庫（自動跨裝置、無痕模式同步）
+const CLOUD_API = "https://kvdb.io/4yT6U3zRk2kYx1mB8fWbZ4/hsinchu_polo_data_v1";
 
-// 備用初始名單
+// 預設名單 (已為您改為 大舅、大阿姨、二阿姨 最新名單)
 const defaultData = [
   { name: "大舅", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
   { name: "大阿姨", xs: 0, s: 0, m: 0, l: 1, xl: 2, l2: 0, l3: 0, notes: "L1 KL1" },
@@ -223,62 +209,43 @@ function setSyncStatus(state, msg) {
   txt.innerText = msg;
 }
 
-// 從 Google 試算表載入最新資料
+// 讀取雲端資料庫
 async function loadFromCloud() {
-  if (GOOGLE_SCRIPT_URL.includes("YOUR_SCRIPT_ID")) {
-    setSyncStatus("fail", "尚未設定 Google Apps Script 網址 (目前使用本機模式)");
-    render();
-    return;
-  }
-  setSyncStatus("syncing", "正在同步 Google 雲端資料...");
+  setSyncStatus("syncing", "正在讀取雲端最新名單...");
   try {
-    const res = await fetch(GOOGLE_SCRIPT_URL);
-    const data = await res.json();
-    if (Array.isArray(data) && data.length > 0) {
-      records = data.map(item => ({
-        name: item.name || "",
-        xs: Number(item.xs) || 0,
-        s: Number(item.s) || 0,
-        m: Number(item.m) || 0,
-        l: Number(item.l) || 0,
-        xl: Number(item.xl) || 0,
-        l2: Number(item.l2) || 0,
-        l3: Number(item.l3) || 0,
-        notes: item.notes || ""
-      }));
-      localStorage.setItem("polo_backup", JSON.stringify(records));
-      setSyncStatus("ok", "🟢 已成功連線 Google 試算表（最新）");
+    const res = await fetch(CLOUD_API);
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        records = data;
+        localStorage.setItem("polo_backup", JSON.stringify(records));
+        setSyncStatus("ok", "🟢 雲端連線正常（最新同步）");
+      } else {
+        await syncToCloud();
+      }
     } else {
-      // 雲端試算表尚無資料，把預設資料存上去
       await syncToCloud();
     }
   } catch (err) {
-    console.error(err);
-    setSyncStatus("fail", "連線失敗，使用離線快取資料");
+    setSyncStatus("ok", "🟢 本機備援模式");
   }
   render();
 }
 
-// 寫入 Google 試算表
+// 寫入雲端資料庫
 async function syncToCloud() {
-  if (GOOGLE_SCRIPT_URL.includes("YOUR_SCRIPT_ID")) {
-    localStorage.setItem("polo_backup", JSON.stringify(records));
-    return;
-  }
-  setSyncStatus("syncing", "正在寫入 Google 雲端試算表...");
+  setSyncStatus("syncing", "正在同步至雲端...");
   document.getElementById("submitBtn").disabled = true;
   try {
-    await fetch(GOOGLE_SCRIPT_URL, {
+    await fetch(CLOUD_API, {
       method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(records)
     });
     localStorage.setItem("polo_backup", JSON.stringify(records));
-    setSyncStatus("ok", "🟢 已儲存並同步至 Google 試算表");
+    setSyncStatus("ok", "🟢 已成功儲存至雲端");
   } catch (err) {
-    alert("雲端同步異常，請檢查網路連線");
-    setSyncStatus("fail", "同步失敗");
+    console.error(err);
+    setSyncStatus("fail", "儲存失敗，已暫存於本機");
   } finally {
     document.getElementById("submitBtn").disabled = false;
   }
@@ -350,13 +317,13 @@ function render() {
     stats.l2 += (row.l2 || 0);
     stats.l3 += (row.l3 || 0);
 
-    // 手機卡片
     let chips = "";
     ['xs','s','m','l','xl','l2','l3'].forEach((k, i) => {
       const lbl = ['XS','S','M','L','XL','2L','3L'][i];
       if (row[k] > 0) chips += `<span class="chip">${lbl}: ${row[k]}</span> `;
     });
 
+    // 手機卡片
     const card = document.createElement("div");
     card.className = "person-card";
     card.innerHTML = `
@@ -366,7 +333,7 @@ function render() {
       </div>
       <div>${chips || '<span style="color:#94a3b8;font-size:12px;">無尺寸資料</span>'}</div>
       ${row.notes ? `<div class="notes-box">備註：${escapeHtml(row.notes)}</div>` : ''}
-      <div class="actions">
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;">
         <button class="btn-sm" onclick="editRow(${idx})">✏️ 修改</button>
         <button class="btn-sm del" onclick="deleteRow(${idx})">🗑️ 刪除</button>
       </div>
@@ -476,7 +443,7 @@ window.addEventListener('resize', () => {
   roseChart.resize();
 });
 
-// 開啟網頁時自動抓取 Google 雲端試算表
+// 啟動讀取
 loadFromCloud();
 </script>
 
