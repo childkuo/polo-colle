@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>2026/12 新竹基金會 - 衣服尺寸線上統計</title>
-  <!-- 引入 Apache ECharts 圖表庫 -->
+  <title>2026/12 新竹基金會 - 衣服尺寸 BI 統計與登記儀表板</title>
+  <!-- 引入 Apache ECharts 專業商業圖表庫 -->
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
     :root {
       --primary: #2563eb;
       --primary-active: #1d4ed8;
-      --primary-light: #eff6ff;
       --bg: #f8fafc;
       --card-bg: #ffffff;
       --border: #e2e8f0;
@@ -21,12 +20,11 @@
       --radius: 14px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "PingFang TC", "Microsoft JhengHei", sans-serif; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background-color: var(--bg); color: var(--text); padding-bottom: 95px; }
+    .container { max-width: 1080px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
 
-    .container { max-width: 1024px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
-
-    /* 頂部雲端連線狀態 */
+    /* 頂部同步狀態 */
     .sync-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
     .sync-status { display: flex; align-items: center; gap: 8px; }
     .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
@@ -36,15 +34,34 @@
     @keyframes blink { 50% { opacity: 0.3; } }
 
     /* 標題卡片 */
-    .app-header { background: white; padding: 16px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .app-header { background: white; padding: 18px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
     .app-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px; }
-    .app-title { font-size: 19px; font-weight: 800; color: #0f172a; line-height: 1.3; }
-    .app-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+    .app-title { font-size: 20px; font-weight: 800; color: #0f172a; line-height: 1.3; }
 
     /* 通用卡片 */
     .card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .card-title { font-size: 16px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px; }
+
+    /* ---------------- BI 關鍵指標看板 (KPIs) ---------------- */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 12px; }
+    .kpi-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
+    .kpi-card.hero { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #93c5fd; }
+    .kpi-label { font-size: 11.5px; font-weight: 700; color: var(--text-muted); }
+    .kpi-value { font-size: 24px; font-weight: 900; color: #1e3a8a; margin-top: 2px; }
+    .kpi-sub { font-size: 11px; font-weight: 600; color: #2563eb; }
+
+    /* 尺寸數據速查標籤列 */
+    .size-chips-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(65px, 1fr)); gap: 6px; margin-top: 10px; }
+    .size-badge { background: #f1f5f9; border: 1px solid var(--border); border-radius: 8px; padding: 6px 4px; text-align: center; }
+    .size-badge .s-name { font-size: 11px; font-weight: 700; color: var(--text-muted); }
+    .size-badge .s-num { font-size: 16px; font-weight: 800; color: var(--primary); }
+
+    /* ---------------- BI 圖表網格 ---------------- */
+    .charts-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 768px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
+    .chart-box { width: 100%; height: 290px; }
+    .chart-box-full { width: 100%; height: 260px; }
 
     /* 衣服規格抽屜 (可收摺) */
     .toggle-btn { background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #475569; cursor: pointer; }
@@ -59,17 +76,9 @@
     .color-pill { display: flex; align-items: center; gap: 4px; font-size: 11px; background: #f8fafc; border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; }
     .color-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); }
 
-    /* BI 圖表 */
-    .charts-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
-    @media (min-width: 768px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
-    .chart-box { width: 100%; height: 280px; }
-
-    /* 表單元件 */
+    /* 輸入表單 */
     .form-label { font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block; }
     .input-text { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; outline: none; background: #fff; }
-    .input-text:focus { border-color: var(--primary); }
-
-    /* 加減計數器 (Stepper) */
     .stepper-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
     @media (min-width: 600px) { .stepper-grid { grid-template-columns: repeat(4, 1fr); } }
     .stepper-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; }
@@ -88,7 +97,7 @@
     .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; font-weight: 600; }
     .btn-sm.del { color: var(--danger); border-color: #fecaca; }
 
-    /* 手機卡片列表 */
+    /* 名冊卡片 / 表格 */
     .roster-cards { display: flex; flex-direction: column; gap: 8px; }
     @media (min-width: 768px) { .roster-cards { display: none; } }
     .person-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
@@ -96,14 +105,12 @@
     .chip { font-size: 11px; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 7px; border-radius: 6px; }
     .notes-box { font-size: 11px; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 6px; font-weight: 600; width: fit-content; }
 
-    /* 電腦表格 */
     .roster-table-wrap { display: none; overflow-x: auto; }
     @media (min-width: 768px) { .roster-table-wrap { display: block; } }
     .desk-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
     .desk-table th, .desk-table td { border: 1px solid var(--border); padding: 8px; }
     .desk-table th { background: #f8fafc; }
 
-    /* 底部固定總計列 */
     .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.04); }
   </style>
 </head>
@@ -111,10 +118,10 @@
 
 <div class="container">
 
-  <!-- 雲端同步指示 -->
+  <!-- 頂部雲端連線狀態條 -->
   <div class="sync-bar">
     <div class="sync-status">
-      <span class="dot yellow" id="syncDot"></span>
+      <span class="dot green" id="syncDot"></span>
       <span id="syncText">正在連線 Google 雲端試算表...</span>
     </div>
     <button class="btn-sm" onclick="loadFromCloud()">🔄 重新整理</button>
@@ -122,14 +129,63 @@
 
   <div class="app-header">
     <span class="app-badge">2026/12 新竹基金會</span>
-    <h1 class="app-title">POLO衫尺寸統計與登記表</h1>
-    <p class="app-desc">自動連線 Google 試算表 · 跨裝置即時同步 · 專為手機輸入優化</p>
+    <h1 class="app-title">POLO衫尺寸 BI 統計分析與登記系統</h1>
+  </div>
+
+  <!-- 📊 1. BI 核心數據總覽看板 (KPIs) -->
+  <div class="card">
+    <div class="card-title">📈 統計數據總覽 (KPI 指標)</div>
+    <div class="kpi-grid">
+      <div class="kpi-card hero">
+        <div class="kpi-label">總需求件數</div>
+        <div class="kpi-value" id="kpiTotal">0</div>
+        <div class="kpi-sub">總訂製量</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">登記總人數</div>
+        <div class="kpi-value" id="kpiPeople">0</div>
+        <div class="kpi-sub" id="kpiAvg">平均 0 件/人</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">需求最高尺寸 🏆</div>
+        <div class="kpi-value" id="kpiTopSize" style="color:#d97706;">-</div>
+        <div class="kpi-sub" id="kpiTopSizeCount">0 件</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">次高尺寸 🥈</div>
+        <div class="kpi-value" id="kpiSecSize" style="color:#475569;">-</div>
+        <div class="kpi-sub" id="kpiSecSizeCount">0 件</div>
+      </div>
+    </div>
+
+    <!-- 各尺寸數量彩色速查牌 -->
+    <div class="size-chips-bar" id="sizeChipsBar">
+      <!-- 動態產生 -->
+    </div>
+  </div>
+
+  <!-- 📊 2. BI 視覺化圖表看板 (圓餅圖 + 南丁格爾玫瑰圖) -->
+  <div class="charts-grid">
+    <div class="card">
+      <div class="card-title">🥧 圓餅圖 - 各尺寸佔比 (%) 與件數</div>
+      <div id="pieChart" class="chart-box"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🌹 南丁格爾玫瑰圖 - 階梯量級分佈</div>
+      <div id="roseChart" class="chart-box"></div>
+    </div>
+  </div>
+
+  <!-- 📊 3. BI 直方柱狀圖 (清楚比較各尺寸直觀件數) -->
+  <div class="card">
+    <div class="card-title">📊 各尺寸需求件數長條圖 (直接標記件數)</div>
+    <div id="barChart" class="chart-box-full"></div>
   </div>
 
   <!-- 衣服規格與長寬圖 (可收摺抽屜) -->
   <div class="card">
     <div class="card-header" style="margin-bottom:0;">
-      <div class="card-title">📐 衣服長寬圖形與色卡</div>
+      <div class="card-title">📐 衣服長寬圖形與色卡對照</div>
       <button class="toggle-btn" onclick="toggleSpec()" id="specToggleBtn">展開對照表 ▾</button>
     </div>
     <div id="specContent">
@@ -168,18 +224,6 @@
           </table>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- BI 雙圖表 -->
-  <div class="charts-grid">
-    <div class="card">
-      <div class="card-title">🥧 圓餅圖 (各尺寸佔比)</div>
-      <div id="pieChart" class="chart-box"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">🌹 南丁格爾玫瑰圖 (數量階梯)</div>
-      <div id="roseChart" class="chart-box"></div>
     </div>
   </div>
 
@@ -245,9 +289,7 @@
       <div class="card-title">📋 登記名冊明細 (<span id="peopleCount">0</span>人)</div>
       <button class="btn-sm" onclick="exportToCSV()">📥 匯出 Excel</button>
     </div>
-    <!-- 手機卡片 -->
     <div class="roster-cards" id="mobileCards"></div>
-    <!-- 電腦表格 -->
     <div class="roster-table-wrap">
       <table class="desk-table">
         <thead>
@@ -276,7 +318,7 @@
 // ⭐ 已直接綁定您專屬的 Google Apps Script 雲端網址
 const CLOUD_API = "https://script.google.com/macros/s/AKfycbzrfWSIeKgfvfLWNTwdr1rCJ7iKnP90Or4pv9cQLnxaWfLWwswZGQE4dSljLt5Ot4MC/exec";
 
-// 初始名單
+// 初始名單 (確保離線或首頁第一毫秒即有完整呈現)
 const defaultData = [
   { name: "大舅", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
   { name: "大阿姨", xs: 0, s: 0, m: 0, l: 1, xl: 2, l2: 0, l3: 0, notes: "L1 KL1" },
@@ -303,9 +345,14 @@ const defaultData = [
 let records = JSON.parse(localStorage.getItem("polo_backup")) || defaultData;
 let formSizes = { xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0 };
 
+// 初始化三大 BI 圖表
 const pieChart = echarts.init(document.getElementById('pieChart'));
 const roseChart = echarts.init(document.getElementById('roseChart'));
+const barChart = echarts.init(document.getElementById('barChart'));
+
 const colors = ['#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+const sizeKeys = ['xs', 's', 'm', 'l', 'xl', 'l2', 'l3'];
+const sizeLabels = ['XS', 'S', 'M', 'L', 'XL', '2L', '3L'];
 
 function setSyncStatus(state, msg) {
   const dot = document.getElementById("syncDot");
@@ -326,7 +373,169 @@ function toggleSpec() {
   }
 }
 
-// 強制防快取載入 Google 試算表
+// 繪製與即時更新三大 BI 圖表與指標
+function updateBIDashboard(stats, totalCount, peopleCount) {
+  // 1. 更新 KPI 指標卡
+  document.getElementById("kpiTotal").innerText = totalCount;
+  document.getElementById("kpiPeople").innerText = peopleCount;
+  document.getElementById("kpiAvg").innerText = peopleCount > 0 ? `平均 ${(totalCount / peopleCount).toFixed(1)} 件/人` : '0 件/人';
+
+  // 計算最高與次高
+  const sortedSizes = sizeKeys.map((k, idx) => ({ name: sizeLabels[idx], val: stats[k] })).sort((a, b) => b.val - a.val);
+  document.getElementById("kpiTopSize").innerText = sortedSizes[0].val > 0 ? sortedSizes[0].name : '-';
+  document.getElementById("kpiTopSizeCount").innerText = sortedSizes[0].val > 0 ? `${sortedSizes[0].val} 件` : '0 件';
+  document.getElementById("kpiSecSize").innerText = sortedSizes[1].val > 0 ? sortedSizes[1].name : '-';
+  document.getElementById("kpiSecSizeCount").innerText = sortedSizes[1].val > 0 ? `${sortedSizes[1].val} 件` : '0 件';
+
+  // 2. 渲染各尺寸彩色速查牌
+  const chipsBar = document.getElementById("sizeChipsBar");
+  chipsBar.innerHTML = sizeLabels.map((lbl, idx) => `
+    <div class="size-badge">
+      <div class="s-name">${lbl}</div>
+      <div class="s-num">${stats[sizeKeys[idx]]}</div>
+    </div>
+  `).join('');
+
+  // 準備圖表資料 (只取有件數的顯示扇區，避免標籤重疊)
+  const chartData = sizeLabels.map((lbl, idx) => ({ name: lbl, value: stats[sizeKeys[idx]] })).filter(d => d.value > 0);
+
+  // BI 圖表 1：圓餅圖 (直拉標註 百分比與件數)
+  pieChart.setOption({
+    color: colors,
+    tooltip: { trigger: 'item', formatter: '{b} 號: {c} 件 ({d}%)' },
+    series: [{
+      type: 'pie',
+      radius: ['32%', '62%'],
+      center: ['50%', '50%'],
+      avoidLabelOverlap: true,
+      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+      label: {
+        show: true,
+        formatter: '{b}\n{c}件 ({d}%)',
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#1e293b'
+      },
+      labelLine: { length: 8, length2: 6 },
+      data: chartData
+    }]
+  });
+
+  // BI 圖表 2：南丁格爾玫瑰圖 (極座標半徑拉伸)
+  roseChart.setOption({
+    color: colors,
+    tooltip: { trigger: 'item', formatter: '{b} 號: {c} 件' },
+    series: [{
+      type: 'pie',
+      radius: ['18%', '68%'],
+      center: ['50%', '50%'],
+      roseType: 'radius',
+      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+      label: {
+        show: true,
+        formatter: '{b}: {c}件',
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#0f172a'
+      },
+      labelLine: { length: 6, length2: 6 },
+      data: chartData
+    }]
+  });
+
+  // BI 圖表 3：尺寸長條圖 (柱頂直接標記件數)
+  barChart.setOption({
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { top: '30px', left: '10px', right: '15px', bottom: '10px', containLabel: true },
+    xAxis: {
+      type: 'category',
+      data: sizeLabels,
+      axisLabel: { fontWeight: 'bold' }
+    },
+    yAxis: { type: 'value', minInterval: 1 },
+    series: [{
+      name: '需求件數',
+      type: 'bar',
+      barWidth: '40%',
+      data: sizeKeys.map((k, i) => ({
+        value: stats[k],
+        itemStyle: { color: colors[i], borderRadius: [6, 6, 0, 0] }
+      })),
+      label: {
+        show: true,
+        position: 'top',
+        formatter: '{c} 件',
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#1e293b'
+      }
+    }]
+  });
+}
+
+function render() {
+  const mobileContainer = document.getElementById("mobileCards");
+  const deskTbody = document.getElementById("desktopTableBody");
+  mobileContainer.innerHTML = "";
+  deskTbody.innerHTML = "";
+
+  let totalCount = 0;
+  let stats = { xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0 };
+
+  records.forEach((row, idx) => {
+    const rowTotal = (row.xs||0)+(row.s||0)+(row.m||0)+(row.l||0)+(row.xl||0)+(row.l2||0)+(row.l3||0);
+    totalCount += rowTotal;
+
+    sizeKeys.forEach(k => stats[k] += (row[k] || 0));
+
+    let chips = "";
+    sizeKeys.forEach((k, i) => {
+      if (row[k] > 0) chips += `<span class="chip">${sizeLabels[i]}: ${row[k]}</span> `;
+    });
+
+    // 手機卡片
+    const card = document.createElement("div");
+    card.className = "person-card";
+    card.innerHTML = `
+      <div class="person-top">
+        <span>${idx + 1}. ${escapeHtml(row.name)}</span>
+        <span style="color:var(--primary); font-size:13px;">${rowTotal > 0 ? `共 ${rowTotal} 件` : '未登記'}</span>
+      </div>
+      <div>${chips || '<span style="color:#94a3b8;font-size:12px;">無尺寸資料</span>'}</div>
+      ${row.notes ? `<div class="notes-box">備註：${escapeHtml(row.notes)}</div>` : ''}
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;">
+        <button class="btn-sm" onclick="editRow(${idx})">✏️ 修改</button>
+        <button class="btn-sm del" onclick="deleteRow(${idx})">🗑️ 刪除</button>
+      </div>
+    `;
+    mobileContainer.appendChild(card);
+
+    // 電腦表格
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${idx + 1}</td>
+      <td style="font-weight:700;">${escapeHtml(row.name)}</td>
+      <td>${row.xs || "-"}</td><td>${row.s || "-"}</td><td>${row.m || "-"}</td>
+      <td>${row.l || "-"}</td><td>${row.xl || "-"}</td><td>${row.l2 || "-"}</td><td>${row.l3 || "-"}</td>
+      <td style="font-weight:800; color:var(--primary);">${rowTotal || "-"}</td>
+      <td>${row.notes ? `<span class="notes-box">${escapeHtml(row.notes)}</span>` : ""}</td>
+      <td>
+        <button class="btn-sm" onclick="editRow(${idx})">修改</button>
+        <button class="btn-sm del" onclick="deleteRow(${idx})">刪除</button>
+      </td>
+    `;
+    deskTbody.appendChild(tr);
+  });
+
+  document.getElementById("statBottomTotal").innerText = totalCount;
+  document.getElementById("statBottomSummary").innerText = `L:${stats.l} / XL:${stats.xl} / M:${stats.m} / 2L:${stats.l2}`;
+  document.getElementById("peopleCount").innerText = records.length;
+
+  // 即刻刷新 BI 看板
+  updateBIDashboard(stats, totalCount, records.length);
+}
+
+// 雲端載入 (含防快取機制)
 async function loadFromCloud() {
   setSyncStatus("syncing", "正在同步 Google 雲端資料庫...");
   try {
@@ -361,7 +570,6 @@ async function loadFromCloud() {
   render();
 }
 
-// 寫入 Google 試算表
 async function syncToCloud() {
   setSyncStatus("syncing", "正在寫入 Google 試算表...");
   document.getElementById("submitBtn").disabled = true;
@@ -392,107 +600,6 @@ function setFormQty(key, val) {
   document.getElementById(`disp_${key}`).innerText = formSizes[key];
 }
 
-function updateCharts(stats) {
-  const chartData = [
-    { name: 'XS', value: stats.xs },
-    { name: 'S',  value: stats.s },
-    { name: 'M',  value: stats.m },
-    { name: 'L',  value: stats.l },
-    { name: 'XL', value: stats.xl },
-    { name: '2L', value: stats.l2 },
-    { name: '3L', value: stats.l3 }
-  ].filter(d => d.value > 0);
-
-  pieChart.setOption({
-    color: colors,
-    tooltip: { trigger: 'item', formatter: '{b}: {c}件 ({d}%)' },
-    series: [{
-      type: 'pie',
-      radius: ['32%', '65%'],
-      label: { show: true, formatter: '{b}: {c}件\n({d}%)', fontSize: 11, fontWeight: 'bold' },
-      data: chartData
-    }]
-  });
-
-  roseChart.setOption({
-    color: colors,
-    tooltip: { trigger: 'item', formatter: '{b}: {c}件' },
-    series: [{
-      type: 'pie',
-      radius: ['18%', '68%'],
-      roseType: 'radius',
-      label: { show: true, formatter: '{b}\n{c}件', fontSize: 11, fontWeight: 'bold' },
-      data: chartData
-    }]
-  });
-}
-
-function render() {
-  const mobileContainer = document.getElementById("mobileCards");
-  const deskTbody = document.getElementById("desktopTableBody");
-  mobileContainer.innerHTML = "";
-  deskTbody.innerHTML = "";
-
-  let totalCount = 0;
-  let stats = { xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0 };
-
-  records.forEach((row, idx) => {
-    const rowTotal = (row.xs||0)+(row.s||0)+(row.m||0)+(row.l||0)+(row.xl||0)+(row.l2||0)+(row.l3||0);
-    totalCount += rowTotal;
-
-    stats.xs += (row.xs || 0);
-    stats.s  += (row.s  || 0);
-    stats.m  += (row.m  || 0);
-    stats.l  += (row.l  || 0);
-    stats.xl += (row.xl || 0);
-    stats.l2 += (row.l2 || 0);
-    stats.l3 += (row.l3 || 0);
-
-    let chips = "";
-    ['xs','s','m','l','xl','l2','l3'].forEach((k, i) => {
-      const lbl = ['XS','S','M','L','XL','2L','3L'][i];
-      if (row[k] > 0) chips += `<span class="chip">${lbl}: ${row[k]}</span> `;
-    });
-
-    const card = document.createElement("div");
-    card.className = "person-card";
-    card.innerHTML = `
-      <div class="person-top">
-        <span>${idx + 1}. ${escapeHtml(row.name)}</span>
-        <span style="color:var(--primary); font-size:13px;">${rowTotal > 0 ? `共 ${rowTotal} 件` : '未登記'}</span>
-      </div>
-      <div>${chips || '<span style="color:#94a3b8;font-size:12px;">無尺寸資料</span>'}</div>
-      ${row.notes ? `<div class="notes-box">備註：${escapeHtml(row.notes)}</div>` : ''}
-      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px;">
-        <button class="btn-sm" onclick="editRow(${idx})">✏️ 修改</button>
-        <button class="btn-sm del" onclick="deleteRow(${idx})">🗑️ 刪除</button>
-      </div>
-    `;
-    mobileContainer.appendChild(card);
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${idx + 1}</td>
-      <td style="font-weight:700;">${escapeHtml(row.name)}</td>
-      <td>${row.xs || "-"}</td><td>${row.s || "-"}</td><td>${row.m || "-"}</td>
-      <td>${row.l || "-"}</td><td>${row.xl || "-"}</td><td>${row.l2 || "-"}</td><td>${row.l3 || "-"}</td>
-      <td style="font-weight:800; color:var(--primary);">${rowTotal || "-"}</td>
-      <td>${row.notes ? `<span class="notes-box">${escapeHtml(row.notes)}</span>` : ""}</td>
-      <td>
-        <button class="btn-sm" onclick="editRow(${idx})">修改</button>
-        <button class="btn-sm del" onclick="deleteRow(${idx})">刪除</button>
-      </td>
-    `;
-    deskTbody.appendChild(tr);
-  });
-
-  document.getElementById("statBottomTotal").innerText = totalCount;
-  document.getElementById("statBottomSummary").innerText = `L:${stats.l} / XL:${stats.xl} / M:${stats.m} / 2L:${stats.l2}`;
-  document.getElementById("peopleCount").innerText = records.length;
-
-  updateCharts(stats);
-}
-
 async function saveEntry(e) {
   e.preventDefault();
   const editIdx = parseInt(document.getElementById("editIndex").value);
@@ -520,7 +627,7 @@ function editRow(index) {
   document.getElementById("editIndex").value = index;
   document.getElementById("name").value = row.name;
   document.getElementById("notes").value = row.notes || "";
-  ['xs','s','m','l','xl','l2','l3'].forEach(k => setFormQty(k, row[k]));
+  sizeKeys.forEach(k => setFormQty(k, row[k]));
 
   document.getElementById("formTitle").innerText = `✏️ 正在修改：${row.name}`;
   document.getElementById("submitBtn").innerText = "確認修改並同步";
@@ -534,7 +641,7 @@ function resetForm() {
   document.getElementById("formTitle").innerText = "✏️ 登記與修改尺寸";
   document.getElementById("submitBtn").innerText = "儲存並同步至雲端";
   document.getElementById("cancelBtn").style.display = "none";
-  ['xs','s','m','l','xl','l2','l3'].forEach(k => setFormQty(k, 0));
+  sizeKeys.forEach(k => setFormQty(k, 0));
 }
 
 async function deleteRow(index) {
@@ -570,9 +677,13 @@ function escapeHtml(text) {
 window.addEventListener('resize', () => {
   pieChart.resize();
   roseChart.resize();
+  barChart.resize();
 });
 
-// 自動載入 Google 試算表資料
+// ⭐ 啟動第一毫秒即渲染 BI 圖表（避免等待網路連線而畫面留白）
+render();
+
+// 背景拉取 Google 試算表最新資料
 loadFromCloud();
 </script>
 
