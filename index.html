@@ -20,11 +20,12 @@
     .container { max-width: 1024px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
 
     /* 雲端狀態橫幅 */
-    .sync-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+    .sync-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
     .sync-status { display: flex; align-items: center; gap: 6px; }
     .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
     .dot.green { background: #22c55e; }
     .dot.yellow { background: #eab308; animation: blink 1s infinite; }
+    .dot.red { background: #ef4444; }
     @keyframes blink { 50% { opacity: 0.3; } }
 
     .app-header { background: white; padding: 16px; border-radius: var(--radius); border: 1px solid var(--border); }
@@ -33,12 +34,10 @@
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .card-title { font-size: 16px; font-weight: 700; color: #1e293b; }
 
-    /* 圖表區 */
     .charts-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
     @media (min-width: 768px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
     .chart-box { width: 100%; height: 280px; }
 
-    /* 表單 */
     .form-label { font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block; }
     .input-text { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; }
     .stepper-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
@@ -50,10 +49,9 @@
     .btn { height: 44px; border-radius: 8px; font-size: 15px; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 1; }
     .btn-primary { background: var(--primary); color: white; }
     .btn-primary:disabled { background: #94a3b8; }
-    .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; font-weight: 600; }
     .btn-sm.del { color: var(--danger); border-color: #fecaca; }
 
-    /* 手機卡片列表 */
     .roster-cards { display: flex; flex-direction: column; gap: 8px; }
     @media (min-width: 768px) { .roster-cards { display: none; } }
     .person-card { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
@@ -61,14 +59,12 @@
     .chip { font-size: 11px; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 7px; border-radius: 6px; }
     .notes-box { font-size: 11px; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 6px; font-weight: 600; width: fit-content; }
 
-    /* 電腦表格 */
     .roster-table-wrap { display: none; overflow-x: auto; }
     @media (min-width: 768px) { .roster-table-wrap { display: block; } }
     .desk-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
     .desk-table th, .desk-table td { border: 1px solid var(--border); padding: 8px; }
     .desk-table th { background: #f8fafc; }
 
-    /* 底部固定條 */
     .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
   </style>
 </head>
@@ -76,20 +72,23 @@
 
 <div class="container">
 
-  <!-- 雲端連線狀態指示燈 -->
+  <!-- 雲端連線狀態條 -->
   <div class="sync-bar">
     <div class="sync-status">
       <span class="dot yellow" id="syncDot"></span>
       <span id="syncText">正在連線雲端資料庫...</span>
     </div>
-    <button class="btn-sm" onclick="loadFromCloud()">🔄 重新整理</button>
+    <div style="display:flex; gap:6px;">
+      <button class="btn-sm" onclick="setCloudUrlManual()">⚙️ 設定雲端網址</button>
+      <button class="btn-sm" onclick="loadFromCloud()">🔄 強制整理</button>
+    </div>
   </div>
 
   <div class="app-header">
     <h1 class="app-title">2026/12 新竹基金會 - 衣服尺寸線上統計</h1>
   </div>
 
-  <!-- BI 雙圖表 -->
+  <!-- BI 圖表 -->
   <div class="charts-grid">
     <div class="card">
       <div class="card-title">🥧 圓餅圖 (各尺寸佔比)</div>
@@ -108,7 +107,7 @@
       <input type="hidden" id="editIndex" value="-1">
       <div style="margin-top: 8px;">
         <label class="form-label" for="name">人員姓名 / 單位代稱 *</label>
-        <input type="text" id="name" class="input-text" placeholder="例如：大舅、鄭勝月" required>
+        <input type="text" id="name" class="input-text" placeholder="例如：大舅、三阿姨" required>
       </div>
 
       <div style="margin-top: 10px;">
@@ -158,28 +157,28 @@
 
 </div>
 
-<!-- 底部固定列 -->
+<!-- 底部固定條 -->
 <div class="bottom-bar">
   <div>
     <div style="font-size:17px;font-weight:800;color:var(--primary);">總計 <span id="statBottomTotal">0</span> 件</div>
-    <div style="font-size:11px;color:var(--text-muted);" id="statBottomSummary">正在統計...</div>
+    <div style="font-size:11px;color:var(--text-muted);" id="statBottomSummary">正在計算...</div>
   </div>
   <button style="padding:8px 16px;background:var(--primary);color:white;border-radius:20px;border:none;font-weight:700;" onclick="scrollToForm()">＋ 立即登記</button>
 </div>
 
 <script>
-// 🌟 專屬雲端儲存庫（自動跨裝置、無痕模式同步）
-const CLOUD_API = "https://kvdb.io/4yT6U3zRk2kYx1mB8fWbZ4/hsinchu_polo_data_v1";
+// ⭐ 可在此處填寫您的 Apps Script 網址，或於網頁點擊「⚙️ 設定雲端網址」填寫
+let CLOUD_API = localStorage.getItem("hsinchu_cloud_api") || "https://script.google.com/macros/s/AKfycbz_YOUR_DEFAULT/exec";
 
-// 預設名單 (已為您改為 大舅、大阿姨、二阿姨 最新名單)
+// 完整同步您最新修改的名冊（含大舅、大阿姨、二阿姨、三阿姨、六阿姨）
 const defaultData = [
   { name: "大舅", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
   { name: "大阿姨", xs: 0, s: 0, m: 0, l: 1, xl: 2, l2: 0, l3: 0, notes: "L1 KL1" },
   { name: "二阿姨", xs: 0, s: 0, m: 0, l: 0, xl: 2, l2: 1, l3: 4, notes: "XS1 M1 S2" },
-  { name: "鄭美月", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "M1" },
+  { name: "三阿姨", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "M1" },
   { name: "鄭滿月", xs: 0, s: 0, m: 0, l: 1, xl: 1, l2: 0, l3: 0, notes: "M1 XS2" },
   { name: "鄭渭月", xs: 2, s: 3, m: 2, l: 1, xl: 3, l2: 1, l3: 0, notes: "" },
-  { name: "鄭綺月", xs: 0, s: 2, m: 0, l: 3, xl: 0, l2: 2, l3: 0, notes: "L2 S1" },
+  { name: "六阿姨", xs: 0, s: 2, m: 0, l: 3, xl: 0, l2: 2, l3: 0, notes: "L2 S1" },
   { name: "湯立雄", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
   { name: "鄭榮林", xs: 0, s: 0, m: 0, l: 0, xl: 1, l2: 0, l3: 0, notes: "" },
   { name: "黃家榮", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
@@ -205,47 +204,79 @@ const colors = ['#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899'
 function setSyncStatus(state, msg) {
   const dot = document.getElementById("syncDot");
   const txt = document.getElementById("syncText");
-  dot.className = "dot " + (state === "ok" ? "green" : state === "syncing" ? "yellow" : "");
+  dot.className = "dot " + (state === "ok" ? "green" : state === "syncing" ? "yellow" : "red");
   txt.innerText = msg;
 }
 
-// 讀取雲端資料庫
+function setCloudUrlManual() {
+  const url = prompt("請貼上您 Google 試算表 Apps Script 部署後的網頁應用程式網址：", CLOUD_API);
+  if (url && url.trim().startsWith("http")) {
+    CLOUD_API = url.trim();
+    localStorage.setItem("hsinchu_cloud_api", CLOUD_API);
+    loadFromCloud();
+  }
+}
+
+// 關鍵修復：加入 cache: 'no-store' 與防快取時間戳記
 async function loadFromCloud() {
-  setSyncStatus("syncing", "正在讀取雲端最新名單...");
+  if (!CLOUD_API || CLOUD_API.includes("YOUR_DEFAULT")) {
+    setSyncStatus("fail", "尚未設定 Google 網址 (請點右上角 ⚙️ 設定)");
+    render();
+    return;
+  }
+  setSyncStatus("syncing", "正在強制從雲端載入最新名單...");
   try {
-    const res = await fetch(CLOUD_API);
+    const freshUrl = `${CLOUD_API}?_t=${Date.now()}`;
+    const res = await fetch(freshUrl, { cache: "no-store" });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
-        records = data;
+        records = data.map(item => ({
+          name: String(item.name || "").trim(),
+          xs: Number(item.xs) || 0,
+          s: Number(item.s) || 0,
+          m: Number(item.m) || 0,
+          l: Number(item.l) || 0,
+          xl: Number(item.xl) || 0,
+          l2: Number(item.l2) || 0,
+          l3: Number(item.l3) || 0,
+          notes: String(item.notes || "").trim()
+        }));
         localStorage.setItem("polo_backup", JSON.stringify(records));
-        setSyncStatus("ok", "🟢 雲端連線正常（最新同步）");
+        setSyncStatus("ok", "🟢 雲端同步完成 (最新資料)");
       } else {
         await syncToCloud();
       }
     } else {
-      await syncToCloud();
+      throw new Error("HTTP 狀態異常: " + res.status);
     }
   } catch (err) {
-    setSyncStatus("ok", "🟢 本機備援模式");
+    console.error(err);
+    setSyncStatus("fail", "連線失敗，目前顯示本機快取");
   }
   render();
 }
 
-// 寫入雲端資料庫
 async function syncToCloud() {
-  setSyncStatus("syncing", "正在同步至雲端...");
+  if (!CLOUD_API || CLOUD_API.includes("YOUR_DEFAULT")) {
+    localStorage.setItem("polo_backup", JSON.stringify(records));
+    setSyncStatus("fail", "尚未設定 Google 網址 (僅存於本機)");
+    return;
+  }
+  setSyncStatus("syncing", "正在寫入 Google 試算表...");
   document.getElementById("submitBtn").disabled = true;
   try {
     await fetch(CLOUD_API, {
       method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify(records)
     });
     localStorage.setItem("polo_backup", JSON.stringify(records));
-    setSyncStatus("ok", "🟢 已成功儲存至雲端");
+    setSyncStatus("ok", "🟢 已成功儲存至 Google 試算表");
   } catch (err) {
     console.error(err);
-    setSyncStatus("fail", "儲存失敗，已暫存於本機");
+    setSyncStatus("fail", "儲存失敗，請檢查網路");
   } finally {
     document.getElementById("submitBtn").disabled = false;
   }
@@ -323,7 +354,6 @@ function render() {
       if (row[k] > 0) chips += `<span class="chip">${lbl}: ${row[k]}</span> `;
     });
 
-    // 手機卡片
     const card = document.createElement("div");
     card.className = "person-card";
     card.innerHTML = `
@@ -340,7 +370,6 @@ function render() {
     `;
     mobileContainer.appendChild(card);
 
-    // 電腦表格
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${idx + 1}</td>
@@ -443,7 +472,6 @@ window.addEventListener('resize', () => {
   roseChart.resize();
 });
 
-// 啟動讀取
 loadFromCloud();
 </script>
 
