@@ -3,75 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2026/12 新竹基金會活動 - 衣服尺寸線上統計表</title>
+  <title>2026/12 新竹基金會活動 - POLO衫尺寸統計與BI分析</title>
+  <!-- 引入 Apache ECharts 專業圖表庫 -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
     :root {
       --primary: #1a56db;
       --primary-hover: #1e429f;
-      --bg: #f8fafc;
+      --bg: #f1f5f9;
       --card-bg: #ffffff;
       --border: #e2e8f0;
-      --text: #1e293b;
+      --text: #0f172a;
       --text-muted: #64748b;
-      --danger: #e02424;
-      --success: #057a55;
-      --warning: #d97706;
+      --danger: #dc2626;
+      --success: #16a34a;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 24px 16px; line-height: 1.5; }
-    .container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    body { background-color: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; }
+    .container { max-width: 1300px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
 
     /* Header */
-    .header { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border); }
-    .header h1 { font-size: 24px; color: #0f172a; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-    .badge { background: #e0e7ff; color: #3730a3; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
-    .header p { color: var(--text-muted); font-size: 14px; }
+    .header { background: white; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
+    .header h1 { font-size: 22px; color: #0f172a; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .badge { background: #dbeafe; color: #1e40af; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
 
-    /* Size Chart & Specs */
-    .card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-    .card-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #0f172a; display: flex; justify-content: space-between; align-items: center; }
+    /* Card Standard */
+    .card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border); padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .card-title { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
 
-    .size-table-wrapper { overflow-x: auto; margin-bottom: 12px; }
-    .spec-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; }
-    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 8px 12px; }
-    .spec-table th { background: #f1f5f9; color: #334155; font-weight: 600; }
-    .spec-table tr:hover { background: #f8fafc; }
-    .item-desc { font-size: 13px; color: var(--text-muted); display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; margin-top: 10px; }
+    /* Garment Diagram & Spec Section */
+    .garment-grid { display: grid; grid-template-columns: 360px 1fr; gap: 20px; }
+    @media (max-width: 900px) { .garment-grid { grid-template-columns: 1fr; } }
 
-    /* Stats Banner */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 12px; }
+    .diagram-box { background: #fafafa; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 16px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    .color-swatches { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; justify-content: center; }
+    .color-chip { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; background: #fff; border: 1px solid #e2e8f0; padding: 3px 8px; border-radius: 20px; }
+    .color-dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.15); display: inline-block; }
+
+    /* Spec Table */
+    .spec-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; margin-bottom: 14px; }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 7px 10px; }
+    .spec-table th { background: #f8fafc; color: #334155; font-weight: 600; }
+
+    /* BI Charts Section */
+    .bi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 860px) { .bi-grid { grid-template-columns: 1fr; } }
+    .chart-wrapper { width: 100%; height: 350px; }
+
+    /* Stats Quick Bar */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
     .stat-box { background: #f8fafc; border: 1px solid var(--border); padding: 12px; border-radius: 8px; text-align: center; }
-    .stat-box.highlight { background: #eff6ff; border-color: #bfdbfe; }
+    .stat-box.primary { background: #eff6ff; border-color: #bfdbfe; }
     .stat-box .label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
-    .stat-box .value { font-size: 22px; font-weight: 800; color: var(--primary); margin-top: 4px; }
+    .stat-box .val { font-size: 22px; font-weight: 800; color: var(--primary); margin-top: 2px; }
 
     /* Form */
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; align-items: end; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group label { font-size: 13px; font-weight: 600; color: #334155; }
-    .form-group input, .form-group select { padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; }
-    .form-group input:focus, .form-group select:focus { border-color: var(--primary); ring: 2px ring-blue-100; }
-    .btn { padding: 9px 18px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; transition: 0.2s; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(115px, 1fr)); gap: 10px; align-items: end; }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 12px; font-weight: 600; color: #475569; }
+    .form-group input { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13px; outline: none; }
+    .form-group input:focus { border-color: var(--primary); }
+    
+    .btn { padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: 0.15s; }
     .btn-primary { background: var(--primary); color: white; }
     .btn-primary:hover { background: var(--primary-hover); }
     .btn-success { background: var(--success); color: white; }
-    .btn-danger { background: var(--danger); color: white; }
     .btn-outline { background: white; border: 1px solid #cbd5e1; color: #334155; }
-    .btn-outline:hover { background: #f1f5f9; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-sm { padding: 3px 8px; font-size: 12px; border-radius: 4px; }
 
-    /* Data Table */
+    /* Table */
     .table-container { overflow-x: auto; margin-top: 10px; }
-    .data-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; }
-    .data-table th, .data-table td { border: 1px solid var(--border); padding: 10px 8px; }
-    .data-table th { background: #f8fafc; font-weight: 600; color: #475569; position: sticky; top: 0; }
-    .data-table tr:hover { background: #f8fafc; }
-    .notes-tag { background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 12px; font-weight: 600; display: inline-block; }
-    .row-actions { display: flex; justify-content: center; gap: 6px; }
-    .btn-sm { padding: 4px 8px; font-size: 12px; border-radius: 4px; }
-
-    /* Utilities */
-    .actions-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .data-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 13px; }
+    .data-table th, .data-table td { border: 1px solid var(--border); padding: 9px 8px; }
+    .data-table th { background: #f8fafc; font-weight: 600; color: #334155; }
+    .notes-badge { background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -81,170 +88,177 @@
   <!-- Header -->
   <div class="header">
     <h1>
-      2026/12 新竹基金會活動 - 衣服尺寸線上統計登記表
-      <span class="badge">Afugo 品牌POLO衫</span>
+      2026/12 新竹基金會活動 - 衣服尺寸線上統計與 BI 儀表板
+      <span class="badge">Afugo 原廠 POLO 衫</span>
     </h1>
-    <p>活動預計於 2026 年 12 月舉行。請核對及填寫參與人員的尺寸與數量，系統會自動儲存變更並統計件數。</p>
+    <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">
+      活動預計於 2026 年 12 月舉行。包含版型長寬圖示、南丁格爾玫瑰圖與圓餅圖實時數據展示，方便即時向成衣廠精確下單。
+    </p>
   </div>
 
-  <!-- Size Chart & Material Specs -->
+  <!-- 衣服圖形、長寬對照圖與規格說明 -->
   <div class="card">
-    <div class="card-title">
-      <span>📐 POLO 衫尺寸對照表 (單位: 公分)</span>
-    </div>
-    <div class="size-table-wrapper">
-      <table class="spec-table">
-        <thead>
-          <tr>
-            <th>尺寸</th>
-            <th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2L</th><th>3L</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>身長</strong></td>
-            <td>58</td><td>62</td><td>67</td><td>70</td><td>73</td><td>76</td><td>79</td>
-          </tr>
-          <tr>
-            <td><strong>胸圍 (腋下左右)</strong></td>
-            <td>42</td><td>46</td><td>50</td><td>53</td><td>56</td><td>60</td><td>64</td>
-          </tr>
-          <tr>
-            <td><strong>肩寬</strong></td>
-            <td>39</td><td>40</td><td>42</td><td>44</td><td>47</td><td>48</td><td>51</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="item-desc">
-      <div>🔹 <strong>材質說明：</strong> 100% POLYESTER HI-COUNT 吸濕排汗布</div>
-      <div>🔹 <strong>認證保證：</strong> GRS、BLUESIGN、Oeko-Tex 雙認證環保布料</div>
-      <div>🔹 <strong>製作產地：</strong> 全程台灣製造 (MADE IN TAIWAN)</div>
-      <div>🔹 <strong>洗滌特性：</strong> 親膚舒適、不易勾紗、不褪色、耐洗抗皺</div>
+    <div class="card-title">📐 POLO 衫版型長寬量測與尺寸對照表</div>
+    <div class="garment-grid">
+      
+      <!-- 向量繪製長寬圖形 -->
+      <div class="diagram-box">
+        <svg width="280" height="230" viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg">
+          <!-- 衣服主體輪廓 -->
+          <path d="M 100,50 L 130,55 L 160,70 L 190,55 L 220,50 L 290,95 L 255,135 L 225,120 L 225,235 L 95,235 L 95,120 L 65,135 L 30,95 Z" 
+                fill="#f1f5f9" stroke="#334155" stroke-width="2.5" stroke-linejoin="round"/>
+          
+          <!-- 領子與門襟 -->
+          <path d="M 130,55 L 160,95 L 190,55" fill="none" stroke="#334155" stroke-width="2"/>
+          <path d="M 145,95 L 175,95 L 175,145 L 145,145 Z" fill="#e2e8f0" stroke="#334155" stroke-width="1.5"/>
+          <circle cx="160" cy="110" r="2.5" fill="#334155"/>
+          <circle cx="160" cy="130" r="2.5" fill="#334155"/>
+
+          <!-- 量測指示 1: 肩寬 (綠線) -->
+          <line x1="100" y1="36" x2="220" y2="36" stroke="#16a34a" stroke-width="2" stroke-dasharray="3,3"/>
+          <line x1="100" y1="30" x2="100" y2="44" stroke="#16a34a" stroke-width="2"/>
+          <line x1="220" y1="30" x2="220" y2="44" stroke="#16a34a" stroke-width="2"/>
+          <text x="160" y="30" fill="#16a34a" font-size="12" font-weight="bold" text-anchor="middle">肩寬 (Shoulder)</text>
+
+          <!-- 量測指示 2: 胸圍 (藍線) -->
+          <line x1="95" y1="128" x2="225" y2="128" stroke="#2563eb" stroke-width="2" stroke-dasharray="3,3"/>
+          <line x1="95" y1="120" x2="95" y2="136" stroke="#2563eb" stroke-width="2"/>
+          <line x1="225" y1="120" x2="225" y2="136" stroke="#2563eb" stroke-width="2"/>
+          <text x="160" y="122" fill="#2563eb" font-size="12" font-weight="bold" text-anchor="middle">胸圍 (腋下左右)</text>
+
+          <!-- 量測指示 3: 身長 (橘紅線) -->
+          <line x1="240" y1="50" x2="240" y2="235" stroke="#ea580c" stroke-width="2" stroke-dasharray="3,3"/>
+          <line x1="233" y1="50" x2="247" y2="50" stroke="#ea580c" stroke-width="2"/>
+          <line x1="233" y1="235" x2="247" y2="235" stroke="#ea580c" stroke-width="2"/>
+          <text x="282" y="150" fill="#ea580c" font-size="12" font-weight="bold" text-anchor="middle">身長</text>
+          <text x="282" y="166" fill="#ea580c" font-size="10" text-anchor="middle">(肩點至下)</text>
+        </svg>
+
+        <!-- 色卡參考 -->
+        <div class="color-swatches">
+          <div class="color-chip"><span class="color-dot" style="background:#111;"></span>001黑色</div>
+          <div class="color-chip"><span class="color-dot" style="background:#fff;"></span>005白色</div>
+          <div class="color-chip"><span class="color-dot" style="background:#be123c;"></span>010玫瑰紅</div>
+          <div class="color-chip"><span class="color-dot" style="background:#1e293b;"></span>013木暗丈青</div>
+          <div class="color-chip"><span class="color-dot" style="background:#ec4899;"></span>015敏銳桃紅</div>
+          <div class="color-chip"><span class="color-dot" style="background:#0284c7;"></span>017湖藍</div>
+        </div>
+      </div>
+
+      <!-- 規格尺寸表 -->
+      <div>
+        <table class="spec-table">
+          <thead>
+            <tr>
+              <th>尺寸 (公分)</th>
+              <th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2L</th><th>3L</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>身長</strong></td>
+              <td>58</td><td>62</td><td>67</td><td>70</td><td>73</td><td>76</td><td>79</td>
+            </tr>
+            <tr>
+              <td><strong>胸圍 (腋下寬)</strong></td>
+              <td>42</td><td>46</td><td>50</td><td>53</td><td>56</td><td>60</td><td>64</td>
+            </tr>
+            <tr>
+              <td><strong>肩寬</strong></td>
+              <td>39</td><td>40</td><td>42</td><td>44</td><td>47</td><td>48</td><td>51</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="font-size: 12.5px; color: var(--text-muted); line-height: 1.8;">
+          ✔ <strong>布料特性：</strong> 100% POLYESTER HI-COUNT (吸濕排汗親膚抗皺，不褪色、不勾紗)<br>
+          ✔ <strong>環保認證：</strong> 經世足賽指定 GRS 國際認證、BLUESIGN、Oeko-Tex 雙認證環保織面<br>
+          ✔ <strong>做工說明：</strong> 採用品牌級針織 YOKO 領、門襟雙開法、全程台灣製造 (MADE IN TAIWAN)
+        </div>
+      </div>
+
     </div>
   </div>
 
-  <!-- Realtime Statistics -->
+  <!-- BI 圖表區域：圓餅圖 + 南丁格爾玫瑰圖 -->
+  <div class="bi-grid">
+    <div class="card">
+      <div class="card-title">🥧 尺寸需求比例 - 圓餅圖 (直接顯示數據與佔比)</div>
+      <div id="pieChart" class="chart-wrapper"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">🌹 尺寸級距分佈 - 南丁格爾玫瑰圖 (半徑依件數伸展)</div>
+      <div id="roseChart" class="chart-wrapper"></div>
+    </div>
+  </div>
+
+  <!-- 總計小字卡 -->
   <div class="card">
-    <div class="card-title">📊 尺寸需求即時總計</div>
     <div class="stats-grid">
-      <div class="stat-box highlight">
-        <div class="label">總件數 (件)</div>
-        <div class="value" id="stat-total">0</div>
+      <div class="stat-box primary">
+        <div class="label">總訂製件數</div>
+        <div class="val" id="stat-total">0</div>
       </div>
-      <div class="stat-box">
-        <div class="label">XS</div>
-        <div class="value" id="stat-xs">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="label">S</div>
-        <div class="value" id="stat-s">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="label">M</div>
-        <div class="value" id="stat-m">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="label">L</div>
-        <div class="value" id="stat-l">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="label">XL</div>
-        <div class="value" id="stat-xl">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="label">2L</div>
-        <div class="value" id="stat-2l">0</div>
-      </div>
-      <div class="stat-box">
-        <div class="label">3L</div>
-        <div class="value" id="stat-3l">0</div>
-      </div>
+      <div class="stat-box"><div class="label">XS</div><div class="val" id="stat-xs">0</div></div>
+      <div class="stat-box"><div class="label">S</div><div class="val" id="stat-s">0</div></div>
+      <div class="stat-box"><div class="label">M</div><div class="val" id="stat-m">0</div></div>
+      <div class="stat-box"><div class="label">L</div><div class="val" id="stat-l">0</div></div>
+      <div class="stat-box"><div class="label">XL</div><div class="val" id="stat-xl">0</div></div>
+      <div class="stat-box"><div class="label">2L</div><div class="val" id="stat-2l">0</div></div>
+      <div class="stat-box"><div class="label">3L</div><div class="val" id="stat-3l">0</div></div>
     </div>
   </div>
 
-  <!-- Form for Adding / Updating -->
+  <!-- 新增/修改表單 -->
   <div class="card">
-    <div class="card-title" id="form-title">➕ 新增 / 編輯登記人員</div>
+    <div class="card-title" id="form-title">➕ 登記 / 修正尺寸明細</div>
     <form id="orderForm" onsubmit="saveEntry(event)">
       <input type="hidden" id="editIndex" value="-1">
       <div class="form-grid">
         <div class="form-group" style="grid-column: span 2;">
-          <label for="name">姓名 / 群組名稱 *</label>
-          <input type="text" id="name" placeholder="例如：王小明 或 台北組" required>
+          <label for="name">姓名 / 地區單位 *</label>
+          <input type="text" id="name" placeholder="例如：鄭勝月" required>
         </div>
-        <div class="form-group">
-          <label for="sz_xs">XS</label>
-          <input type="number" id="sz_xs" min="0" value="0">
-        </div>
-        <div class="form-group">
-          <label for="sz_s">S</label>
-          <input type="number" id="sz_s" min="0" value="0">
-        </div>
-        <div class="form-group">
-          <label for="sz_m">M</label>
-          <input type="number" id="sz_m" min="0" value="0">
-        </div>
-        <div class="form-group">
-          <label for="sz_l">L</label>
-          <input type="number" id="sz_l" min="0" value="0">
-        </div>
-        <div class="form-group">
-          <label for="sz_xl">XL</label>
-          <input type="number" id="sz_xl" min="0" value="0">
-        </div>
-        <div class="form-group">
-          <label for="sz_2l">2L</label>
-          <input type="number" id="sz_2l" min="0" value="0">
-        </div>
-        <div class="form-group">
-          <label for="sz_3l">3L</label>
-          <input type="number" id="sz_3l" min="0" value="0">
-        </div>
+        <div class="form-group"><label for="sz_xs">XS</label><input type="number" id="sz_xs" min="0" value="0"></div>
+        <div class="form-group"><label for="sz_s">S</label><input type="number" id="sz_s" min="0" value="0"></div>
+        <div class="form-group"><label for="sz_m">M</label><input type="number" id="sz_m" min="0" value="0"></div>
+        <div class="form-group"><label for="sz_l">L</label><input type="number" id="sz_l" min="0" value="0"></div>
+        <div class="form-group"><label for="sz_xl">XL</label><input type="number" id="sz_xl" min="0" value="0"></div>
+        <div class="form-group"><label for="sz_2l">2L</label><input type="number" id="sz_2l" min="0" value="0"></div>
+        <div class="form-group"><label for="sz_3l">3L</label><input type="number" id="sz_3l" min="0" value="0"></div>
         <div class="form-group" style="grid-column: span 2;">
-          <label for="notes">備註 (例如: 女版、女款尺寸)</label>
-          <input type="text" id="notes" placeholder="例如: L1, M1 女生">
+          <label for="notes">備註說明 (如: 女款)</label>
+          <input type="text" id="notes" placeholder="例如: L1 KL1, M1">
         </div>
-        <div class="form-group" style="display: flex; flex-direction: row; gap: 8px;">
-          <button type="submit" class="btn btn-primary" style="flex: 1;" id="saveBtn">儲存資料</button>
-          <button type="button" class="btn btn-outline" onclick="resetForm()" id="cancelBtn" style="display:none;">取消</button>
+        <div class="form-group" style="display: flex; flex-direction: row; gap: 6px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;" id="saveBtn">儲存</button>
+          <button type="button" class="btn btn-outline" id="cancelBtn" onclick="resetForm()" style="display:none;">取消</button>
         </div>
       </div>
     </form>
   </div>
 
-  <!-- Roster / Table List -->
+  <!-- 名冊列表 -->
   <div class="card">
-    <div class="actions-bar">
-      <div class="card-title" style="margin-bottom:0;">📋 人員名冊與尺寸明細 (<span id="count-people">0</span> 人)</div>
+    <div class="card-title">
+      <span>📋 登記人員名單 (<span id="count-people">0</span> 人)</span>
       <div style="display: flex; gap: 8px;">
         <button class="btn btn-success" onclick="exportToCSV()">📥 匯出 Excel (CSV)</button>
-        <button class="btn btn-outline" onclick="printTable()">🖨️ 列印 / 存為 PDF</button>
-        <button class="btn btn-outline" style="color: var(--danger);" onclick="resetDefaultData()">↺ 重設回名單預設值</button>
+        <button class="btn btn-outline" style="color:var(--danger);" onclick="resetDefaultData()">↺ 重設原始名冊</button>
       </div>
     </div>
-
     <div class="table-container">
       <table class="data-table">
         <thead>
           <tr>
-            <th style="width: 50px;">No</th>
+            <th>No</th>
             <th>姓名</th>
-            <th>XS</th>
-            <th>S</th>
-            <th>M</th>
-            <th>L</th>
-            <th>XL</th>
-            <th>2L</th>
-            <th>3L</th>
+            <th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2L</th><th>3L</th>
             <th>小計</th>
-            <th>備註</th>
-            <th style="width: 120px;">操作</th>
+            <th>備註女生/規格</th>
+            <th>操作</th>
           </tr>
         </thead>
-        <tbody id="tableBody">
-          <!-- 動態產生 -->
-        </tbody>
+        <tbody id="tableBody"></tbody>
       </table>
     </div>
   </div>
@@ -252,8 +266,8 @@
 </div>
 
 <script>
-// 初始化目前手抄表的所有名單資料
-const defaultData = [
+// 現有手寫名單預載
+const initialData = [
   { name: "鄭萬來", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
   { name: "鄭勝月", xs: 0, s: 0, m: 0, l: 1, xl: 2, l2: 0, l3: 0, notes: "L1 KL1" },
   { name: "葉乾慶", xs: 0, s: 0, m: 0, l: 0, xl: 2, l2: 1, l3: 4, notes: "XS1 M1 S2" },
@@ -276,14 +290,77 @@ const defaultData = [
   { name: "台北",   xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" }
 ];
 
-const STORAGE_KEY = "hsinchu_polo_data_2026";
-let records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
+const STORAGE_KEY = "polo_fund_2026_bi";
+let records = JSON.parse(localStorage.getItem(STORAGE_KEY)) || initialData;
 
-function saveToLocalStorage() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+// 初始化 ECharts 實例
+const pieChart = echarts.init(document.getElementById('pieChart'));
+const roseChart = echarts.init(document.getElementById('roseChart'));
+
+// 7 個尺寸的鮮明主題色
+const sizePalette = ['#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+
+function updateCharts(stats) {
+  // 過濾只有數量 > 0 的尺寸，圖表顯示更乾淨
+  const chartData = [
+    { name: 'XS 號', value: stats.xs },
+    { name: 'S 號',  value: stats.s },
+    { name: 'M 號',  value: stats.m },
+    { name: 'L 號',  value: stats.l },
+    { name: 'XL 號', value: stats.xl },
+    { name: '2L 號', value: stats.l2 },
+    { name: '3L 號', value: stats.l3 }
+  ].filter(item => item.value > 0);
+
+  // 1. 圓餅圖設定 (直接顯示數據與%)
+  pieChart.setOption({
+    color: sizePalette,
+    tooltip: { trigger: 'item', formatter: '{b}: {c}件 ({d}%)' },
+    legend: { bottom: '0%', left: 'center' },
+    series: [{
+      name: '尺寸件數',
+      type: 'pie',
+      radius: ['30%', '62%'],
+      avoidLabelOverlap: true,
+      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+      label: {
+        show: true,
+        position: 'outside',
+        formatter: '{b}\n{c}件 ({d}%)',
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#1e293b'
+      },
+      labelLine: { show: true, length: 15, length2: 12 },
+      data: chartData
+    }]
+  });
+
+  // 2. 南丁格爾玫瑰圖設定 (半徑代表數量)
+  roseChart.setOption({
+    color: sizePalette,
+    tooltip: { trigger: 'item', formatter: '{b}: {c}件 ({d}%)' },
+    legend: { bottom: '0%', left: 'center' },
+    series: [{
+      name: '尺寸玫瑰圖',
+      type: 'pie',
+      radius: ['20%', '65%'],
+      center: ['50%', '48%'],
+      roseType: 'radius', // 面積與半徑均按數值伸展
+      itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
+      label: {
+        show: true,
+        formatter: '{b}: {c}件\n({d}%)',
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#0f172a'
+      },
+      labelLine: { show: true, length: 10, length2: 8 },
+      data: chartData
+    }]
+  });
 }
 
-// 重新渲染表格與統計
 function render() {
   const tbody = document.getElementById("tableBody");
   tbody.innerHTML = "";
@@ -292,7 +369,7 @@ function render() {
   let stats = { xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0 };
 
   records.forEach((row, index) => {
-    const rowTotal = (row.xs || 0) + (row.s || 0) + (row.m || 0) + (row.l || 0) + (row.xl || 0) + (row.l2 || 0) + (row.l3 || 0);
+    const rowTotal = (row.xs||0)+(row.s||0)+(row.m||0)+(row.l||0)+(row.xl||0)+(row.l2||0)+(row.l3||0);
     totalCount += rowTotal;
 
     stats.xs += (row.xs || 0);
@@ -306,7 +383,7 @@ function render() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${index + 1}</td>
-      <td style="font-weight: 600;">${escapeHtml(row.name)}</td>
+      <td style="font-weight:600;">${escapeHtml(row.name)}</td>
       <td>${row.xs || "-"}</td>
       <td>${row.s  || "-"}</td>
       <td>${row.m  || "-"}</td>
@@ -314,19 +391,17 @@ function render() {
       <td>${row.xl || "-"}</td>
       <td>${row.l2 || "-"}</td>
       <td>${row.l3 || "-"}</td>
-      <td style="font-weight: 700; color: var(--primary);">${rowTotal > 0 ? rowTotal : "-"}</td>
-      <td>${row.notes ? `<span class="notes-tag">${escapeHtml(row.notes)}</span>` : ""}</td>
+      <td style="font-weight:700; color:var(--primary);">${rowTotal > 0 ? rowTotal : "-"}</td>
+      <td>${row.notes ? `<span class="notes-badge">${escapeHtml(row.notes)}</span>` : ""}</td>
       <td>
-        <div class="row-actions">
-          <button class="btn btn-outline btn-sm" onclick="editRow(${index})">修改</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteRow(${index})">刪除</button>
-        </div>
+        <button class="btn btn-outline btn-sm" onclick="editRow(${index})">修改</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRow(${index})">刪除</button>
       </td>
     `;
     tbody.appendChild(tr);
   });
 
-  // 更新統計數字
+  // 更新小統計卡
   document.getElementById("stat-total").innerText = totalCount;
   document.getElementById("stat-xs").innerText = stats.xs;
   document.getElementById("stat-s").innerText  = stats.s;
@@ -335,11 +410,12 @@ function render() {
   document.getElementById("stat-xl").innerText = stats.xl;
   document.getElementById("stat-2l").innerText = stats.l2;
   document.getElementById("stat-3l").innerText = stats.l3;
-
   document.getElementById("count-people").innerText = records.length;
+
+  // 即時刷新 BI 圖表
+  updateCharts(stats);
 }
 
-// 儲存表單資料 (新增或更新)
 function saveEntry(e) {
   e.preventDefault();
   const editIdx = parseInt(document.getElementById("editIndex").value);
@@ -362,12 +438,11 @@ function saveEntry(e) {
     records.push(entry);
   }
 
-  saveToLocalStorage();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
   render();
   resetForm();
 }
 
-// 進入編輯模式
 function editRow(index) {
   const row = records[index];
   document.getElementById("editIndex").value = index;
@@ -385,75 +460,59 @@ function editRow(index) {
   document.getElementById("saveBtn").innerText = "確認修改";
   document.getElementById("cancelBtn").style.display = "inline-block";
 
-  window.scrollTo({ top: document.getElementById("orderForm").offsetTop - 40, behavior: 'smooth' });
+  window.scrollTo({ top: document.getElementById("orderForm").offsetTop - 30, behavior: 'smooth' });
 }
 
-// 清除表單
 function resetForm() {
   document.getElementById("orderForm").reset();
   document.getElementById("editIndex").value = -1;
-  document.getElementById("form-title").innerText = "➕ 新增 / 編輯登記人員";
-  document.getElementById("saveBtn").innerText = "儲存資料";
+  document.getElementById("form-title").innerText = "➕ 登記 / 修正尺寸明細";
+  document.getElementById("saveBtn").innerText = "儲存";
   document.getElementById("cancelBtn").style.display = "none";
 }
 
-// 刪除項目
 function deleteRow(index) {
-  if (confirm(`確定要刪除「${records[index].name}」的登記資料嗎？`)) {
+  if (confirm(`確定要刪除「${records[index].name}」的紀錄嗎？`)) {
     records.splice(index, 1);
-    saveToLocalStorage();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     render();
     resetForm();
   }
 }
 
-// 重設回原始名單
 function resetDefaultData() {
-  if (confirm("這將會重設所有內容回復到原登記表名單，確定要重設嗎？")) {
-    records = JSON.parse(JSON.stringify(defaultData));
-    saveToLocalStorage();
+  if (confirm("是否確定回復為圖片原始名單？現有手動修改內容將被覆蓋。")) {
+    records = JSON.parse(JSON.stringify(initialData));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
     render();
     resetForm();
   }
 }
 
-// 匯出 CSV 檔 (含 UTF-8 BOM，Excel 直接開不亂碼)
 function exportToCSV() {
-  let csv = "\uFEFFNo,姓名,XS,S,M,L,XL,2L,3L,小計,備註\n";
+  let csv = "\uFEFFNo,姓名,XS,S,M,L,XL,2L,3L,小計,備註說明\n";
   records.forEach((r, idx) => {
     const total = (r.xs||0)+(r.s||0)+(r.m||0)+(r.l||0)+(r.xl||0)+(r.l2||0)+(r.l3||0);
-    const row = [
-      idx + 1,
-      `"${r.name.replace(/"/g, '""')}"`,
-      r.xs||0,
-      r.s||0,
-      r.m||0,
-      r.l||0,
-      r.xl||0,
-      r.l2||0,
-      r.l3||0,
-      total,
-      `"${(r.notes||"").replace(/"/g, '""')}"`
-    ];
-    csv += row.join(",") + "\n";
+    csv += `${idx + 1},"${r.name.replace(/"/g, '""')}",${r.xs||0},${r.s||0},${r.m||0},${r.l||0},${r.xl||0},${r.l2||0},${r.l3||0},${total},"${(r.notes||"").replace(/"/g, '""')}"\n`;
   });
-
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = `2026_12_新竹基金會活動_衣服尺寸統計表.csv`;
+  link.download = `2026_12_新竹基金會_衣服尺寸統計表.csv`;
   link.click();
-}
-
-function printTable() {
-  window.print();
 }
 
 function escapeHtml(text) {
   return (text || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// 初次載入渲染
+// 監聽視窗縮放以自適應圖表
+window.addEventListener('resize', () => {
+  pieChart.resize();
+  roseChart.resize();
+});
+
+// 啟動初次渲染
 render();
 </script>
 
