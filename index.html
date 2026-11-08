@@ -23,7 +23,7 @@
     body { background-color: var(--bg); color: var(--text); padding-bottom: 95px; }
     .container { max-width: 1080px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
 
-    /* 頂部同步狀態 */
+    /* 頂部同步狀態列 */
     .sync-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
     .sync-status { display: flex; align-items: center; gap: 8px; }
     .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
@@ -40,7 +40,7 @@
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .card-title { font-size: 16px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px; }
 
-    /* BI KPI 看板 */
+    /* 📊 BI KPI 看板 (總件數 / 總人數 / 新竹統計 / 台北統計) */
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 12px; }
     .kpi-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
     .kpi-card.hero { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #93c5fd; }
@@ -66,7 +66,7 @@
     .input-text { width: 100%; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; outline: none; background: #fff; }
     .input-text:focus { border-color: var(--primary); }
 
-    /* 城市按鈕點選器 */
+    /* 城市單選按鈕 */
     .city-picker { display: flex; gap: 8px; height: 44px; }
     .city-btn { flex: 1; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #f8fafc; font-size: 14px; font-weight: 700; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; user-select: none; }
     .city-btn:active { transform: scale(0.96); }
@@ -142,7 +142,7 @@
     <h1 class="app-title">POLO衫尺寸 BI 統計分析與登記系統</h1>
   </div>
 
-  <!-- 📊 1. BI 核心數據總覽看板 -->
+  <!-- 📊 1. BI 核心數據總覽看板 (總件數 / 總人數 / 新竹統計 / 台北統計) -->
   <div class="card">
     <div class="card-title">📈 統計數據總覽 (KPI 指標)</div>
     <div class="kpi-grid">
@@ -156,15 +156,17 @@
         <div class="kpi-value" id="kpiPeople">0</div>
         <div class="kpi-sub" id="kpiAvg">平均 0 件/人</div>
       </div>
+      <!-- ⭐ 新增：新竹需求統計區塊 -->
       <div class="kpi-card">
-        <div class="kpi-label">需求最高尺寸 🏆</div>
-        <div class="kpi-value" id="kpiTopSize" style="color:#d97706;">-</div>
-        <div class="kpi-sub" id="kpiTopSizeCount">0 件</div>
+        <div class="kpi-label">新竹需求統計 📍</div>
+        <div class="kpi-value" id="kpiHsinchu" style="color:#2563eb;">0</div>
+        <div class="kpi-sub" id="kpiHsinchuSub">0 人 · 0%</div>
       </div>
+      <!-- ⭐ 新增：台北需求統計區塊 -->
       <div class="kpi-card">
-        <div class="kpi-label">需求最多城市 📍</div>
-        <div class="kpi-value" id="kpiTopCity" style="color:#2563eb;">-</div>
-        <div class="kpi-sub" id="kpiTopCityCount">0 件</div>
+        <div class="kpi-label">台北需求統計 📍</div>
+        <div class="kpi-value" id="kpiTaipei" style="color:#7c3aed;">0</div>
+        <div class="kpi-sub" id="kpiTaipeiSub">0 人 · 0%</div>
       </div>
     </div>
 
@@ -172,7 +174,7 @@
     <div class="size-chips-bar" id="sizeChipsBar"></div>
   </div>
 
-  <!-- 📊 2. BI 視覺化圖表看板 -->
+  <!-- 📊 2. BI 視覺化圖表看板 (尺寸圓餅圖 + 城市玫瑰圖) -->
   <div class="charts-grid">
     <div class="card">
       <div class="card-title">🥧 尺寸圓餅圖 - 各尺寸佔比 (%) 與件數</div>
@@ -335,7 +337,7 @@
 
 <script>
 // ⭐ 已直接綁定您專屬的 Google Apps Script 雲端網址
-const CLOUD_API = "https://script.google.com/macros/s/AKfycbwxT9__Hc9eMWDNcgXswHNAy8GiIGjLeFL6lDd81zCIn5lbagdIVMaJMtma1mXIigJ9/exec";
+const CLOUD_API = "https://script.google.com/macros/s/AKfycbzrfWSIeKgfvfLWNTwdr1rCJ7iKnP90Or4pv9cQLnxaWfLWwswZGQE4dSljLt5Ot4MC/exec";
 
 // 備用初始名單
 const defaultData = [
@@ -429,28 +431,27 @@ function toggleSpec() {
   }
 }
 
-function updateBIDashboard(stats, totalCount, peopleCount, cityStats) {
+// 刷新 BI 看板 (更新新竹與台北的 KPI 指標)
+function updateBIDashboard(stats, totalCount, peopleCount, cityStats, cityPeople) {
   document.getElementById("kpiTotal").innerText = totalCount;
   document.getElementById("kpiPeople").innerText = peopleCount;
   document.getElementById("kpiAvg").innerText = peopleCount > 0 ? `平均 ${(totalCount / peopleCount).toFixed(1)} 件/人` : '0 件/人';
 
-  const sortedSizes = sizeKeys.map((k, idx) => ({ name: sizeLabels[idx], val: stats[k] })).sort((a, b) => b.val - a.val);
-  document.getElementById("kpiTopSize").innerText = sortedSizes[0].val > 0 ? sortedSizes[0].name : '-';
-  document.getElementById("kpiTopSizeCount").innerText = sortedSizes[0].val > 0 ? `${sortedSizes[0].val} 件` : '0 件';
-
+  // ⭐ 新竹數據計算
   const hCount = cityStats["新竹"] || 0;
-  const tCount = cityStats["台北"] || 0;
-  if (hCount >= tCount && hCount > 0) {
-    document.getElementById("kpiTopCity").innerText = "新竹";
-    document.getElementById("kpiTopCityCount").innerText = `${hCount} 件`;
-  } else if (tCount > hCount) {
-    document.getElementById("kpiTopCity").innerText = "台北";
-    document.getElementById("kpiTopCityCount").innerText = `${tCount} 件`;
-  } else {
-    document.getElementById("kpiTopCity").innerText = "-";
-    document.getElementById("kpiTopCityCount").innerText = `0 件`;
-  }
+  const hPeople = cityPeople["新竹"] || 0;
+  const hPct = totalCount > 0 ? ((hCount / totalCount) * 100).toFixed(1) : "0.0";
+  document.getElementById("kpiHsinchu").innerText = `${hCount} 件`;
+  document.getElementById("kpiHsinchuSub").innerText = `${hPeople} 人 · ${hPct}%`;
 
+  // ⭐ 台北數據計算
+  const tCount = cityStats["台北"] || 0;
+  const tPeople = cityPeople["台北"] || 0;
+  const tPct = totalCount > 0 ? ((tCount / totalCount) * 100).toFixed(1) : "0.0";
+  document.getElementById("kpiTaipei").innerText = `${tCount} 件`;
+  document.getElementById("kpiTaipeiSub").innerText = `${tPeople} 人 · ${tPct}%`;
+
+  // 尺寸彩色速查牌
   const chipsBar = document.getElementById("sizeChipsBar");
   chipsBar.innerHTML = sizeLabels.map((lbl, idx) => `
     <div class="size-badge">
@@ -459,6 +460,7 @@ function updateBIDashboard(stats, totalCount, peopleCount, cityStats) {
     </div>
   `).join('');
 
+  // 圖表 1：尺寸圓餅圖
   const chartData = sizeLabels.map((lbl, idx) => ({ name: lbl, value: stats[sizeKeys[idx]] })).filter(d => d.value > 0);
   pieChart.setOption({
     color: colors,
@@ -475,6 +477,7 @@ function updateBIDashboard(stats, totalCount, peopleCount, cityStats) {
     }]
   });
 
+  // 圖表 2：南丁格爾玫瑰圖 (新竹 vs 台北)
   const roseCityData = [
     { name: "新竹", value: hCount },
     { name: "台北", value: tCount }
@@ -496,6 +499,7 @@ function updateBIDashboard(stats, totalCount, peopleCount, cityStats) {
     }]
   });
 
+  // 圖表 3：尺寸長條圖
   barChart.setOption({
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     grid: { top: '30px', left: '10px', right: '15px', bottom: '10px', containLabel: true },
@@ -520,6 +524,7 @@ function render() {
   let totalCount = 0;
   let stats = { xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0 };
   let cityStats = { "新竹": 0, "台北": 0 };
+  let cityPeople = { "新竹": 0, "台北": 0 };
 
   records.forEach((row, idx) => {
     const rowTotal = (row.xs||0)+(row.s||0)+(row.m||0)+(row.l||0)+(row.xl||0)+(row.l2||0)+(row.l3||0);
@@ -527,6 +532,7 @@ function render() {
 
     const rowCity = (row.city === "台北") ? "台北" : "新竹";
     cityStats[rowCity] += rowTotal;
+    cityPeople[rowCity] += 1;
 
     sizeKeys.forEach(k => stats[k] += (row[k] || 0));
 
@@ -575,7 +581,7 @@ function render() {
   document.getElementById("statBottomSummary").innerText = `L:${stats.l} / XL:${stats.xl} / M:${stats.m} / 2L:${stats.l2}`;
   document.getElementById("peopleCount").innerText = records.length;
 
-  updateBIDashboard(stats, totalCount, records.length, cityStats);
+  updateBIDashboard(stats, totalCount, records.length, cityStats, cityPeople);
 }
 
 // 雲端載入 (採用自適應解析)
