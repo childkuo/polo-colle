@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>2026/12 新竹基金會 - 衣服尺寸 BI 統計與登記儀表板</title>
-  <!-- 引入 Apache ECharts 專業商業圖表庫 -->
+  <title>2026/12 新竹基金會 - 衣服尺寸 BI 統計與登記系統</title>
   <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
   <style>
     :root {
@@ -33,17 +32,15 @@
     .dot.red { background: #ef4444; }
     @keyframes blink { 50% { opacity: 0.3; } }
 
-    /* 標題卡片 */
     .app-header { background: white; padding: 18px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
     .app-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px; }
     .app-title { font-size: 20px; font-weight: 800; color: #0f172a; line-height: 1.3; }
 
-    /* 通用卡片 */
     .card { background: var(--card-bg); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
     .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .card-title { font-size: 16px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px; }
 
-    /* ---------------- BI 關鍵指標看板 (KPIs) ---------------- */
+    /* BI KPI 看板 */
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 12px; }
     .kpi-card { background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 12px; text-align: center; }
     .kpi-card.hero { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-color: #93c5fd; }
@@ -51,34 +48,32 @@
     .kpi-value { font-size: 24px; font-weight: 900; color: #1e3a8a; margin-top: 2px; }
     .kpi-sub { font-size: 11px; font-weight: 600; color: #2563eb; }
 
-    /* 尺寸數據速查標籤列 */
     .size-chips-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(65px, 1fr)); gap: 6px; margin-top: 10px; }
     .size-badge { background: #f1f5f9; border: 1px solid var(--border); border-radius: 8px; padding: 6px 4px; text-align: center; }
     .size-badge .s-name { font-size: 11px; font-weight: 700; color: var(--text-muted); }
     .size-badge .s-num { font-size: 16px; font-weight: 800; color: var(--primary); }
 
-    /* ---------------- BI 圖表網格 ---------------- */
+    /* 圖表網格 */
     .charts-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
     @media (min-width: 768px) { .charts-grid { grid-template-columns: 1fr 1fr; } }
     .chart-box { width: 100%; height: 290px; }
     .chart-box-full { width: 100%; height: 260px; }
 
-    /* 衣服規格抽屜 (可收摺) */
-    .toggle-btn { background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #475569; cursor: pointer; }
-    #specContent { display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 14px; }
-    #specContent.show { display: block; }
-    .diagram-container { display: flex; flex-direction: column; align-items: center; gap: 12px; }
-    .spec-table-scroll { width: 100%; overflow-x: auto; margin-top: 8px; -webkit-overflow-scrolling: touch; }
-    .spec-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; min-width: 320px; }
-    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 4px; }
-    .spec-table th { background: #f8fafc; color: #475569; font-weight: 600; }
-    .colors-wrap { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 6px; }
-    .color-pill { display: flex; align-items: center; gap: 4px; font-size: 11px; background: #f8fafc; border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; }
-    .color-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); }
-
-    /* 輸入表單 */
+    /* 表單元件 */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+    @media (max-width: 580px) { .form-row { grid-template-columns: 1fr; } }
     .form-label { font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px; display: block; }
-    .input-text { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; outline: none; background: #fff; }
+    .input-text { width: 100%; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; outline: none; background: #fff; }
+    .input-text:focus { border-color: var(--primary); }
+
+    /* ⭐ 城市按鈕點選器 (Segmented Radio Buttons) */
+    .city-picker { display: flex; gap: 8px; height: 44px; }
+    .city-btn { flex: 1; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #f8fafc; font-size: 14px; font-weight: 700; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; user-select: none; }
+    .city-btn:active { transform: scale(0.96); }
+    .city-btn.active { background: #eff6ff; border-color: var(--primary); color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15); }
+    .city-btn.active.taipei { background: #f5f3ff; border-color: #7c3aed; color: #7c3aed; box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15); }
+
+    /* 尺寸加減按鈕 */
     .stepper-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 8px; }
     @media (min-width: 600px) { .stepper-grid { grid-template-columns: repeat(4, 1fr); } }
     .stepper-item { background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; }
@@ -97,11 +92,14 @@
     .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; font-weight: 600; }
     .btn-sm.del { color: var(--danger); border-color: #fecaca; }
 
-    /* 名冊卡片 / 表格 */
+    /* 名冊列表 */
     .roster-cards { display: flex; flex-direction: column; gap: 8px; }
     @media (min-width: 768px) { .roster-cards { display: none; } }
     .person-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
     .person-top { display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 15px; }
+    .city-tag { font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; }
+    .city-tag.hsinchu { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .city-tag.taipei { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
     .chip { font-size: 11px; font-weight: 700; background: #dbeafe; color: #1e40af; padding: 2px 7px; border-radius: 6px; }
     .notes-box { font-size: 11px; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 6px; font-weight: 600; width: fit-content; }
 
@@ -111,6 +109,18 @@
     .desk-table th, .desk-table td { border: 1px solid var(--border); padding: 8px; }
     .desk-table th { background: #f8fafc; }
 
+    .toggle-btn { background: #f1f5f9; border: none; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #475569; cursor: pointer; }
+    #specContent { display: none; margin-top: 12px; border-top: 1px solid var(--border); padding-top: 14px; }
+    #specContent.show { display: block; }
+    .diagram-container { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+    .spec-table-scroll { width: 100%; overflow-x: auto; margin-top: 8px; -webkit-overflow-scrolling: touch; }
+    .spec-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 12px; min-width: 320px; }
+    .spec-table th, .spec-table td { border: 1px solid var(--border); padding: 6px 4px; }
+    .spec-table th { background: #f8fafc; color: #475569; font-weight: 600; }
+    .colors-wrap { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 6px; }
+    .color-pill { display: flex; align-items: center; gap: 4px; font-size: 11px; background: #f8fafc; border: 1px solid var(--border); padding: 2px 8px; border-radius: 12px; }
+    .color-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.2); }
+
     .bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.04); }
   </style>
 </head>
@@ -118,7 +128,7 @@
 
 <div class="container">
 
-  <!-- 頂部雲端連線狀態條 -->
+  <!-- 頂部同步狀態 -->
   <div class="sync-bar">
     <div class="sync-status">
       <span class="dot green" id="syncDot"></span>
@@ -132,7 +142,7 @@
     <h1 class="app-title">POLO衫尺寸 BI 統計分析與登記系統</h1>
   </div>
 
-  <!-- 📊 1. BI 核心數據總覽看板 (KPIs) -->
+  <!-- 📊 1. BI 核心數據總覽看板 -->
   <div class="card">
     <div class="card-title">📈 統計數據總覽 (KPI 指標)</div>
     <div class="kpi-grid">
@@ -152,31 +162,29 @@
         <div class="kpi-sub" id="kpiTopSizeCount">0 件</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">次高尺寸 🥈</div>
-        <div class="kpi-value" id="kpiSecSize" style="color:#475569;">-</div>
-        <div class="kpi-sub" id="kpiSecSizeCount">0 件</div>
+        <div class="kpi-label">需求最多城市 📍</div>
+        <div class="kpi-value" id="kpiTopCity" style="color:#2563eb;">-</div>
+        <div class="kpi-sub" id="kpiTopCityCount">0 件</div>
       </div>
     </div>
 
     <!-- 各尺寸數量彩色速查牌 -->
-    <div class="size-chips-bar" id="sizeChipsBar">
-      <!-- 動態產生 -->
-    </div>
+    <div class="size-chips-bar" id="sizeChipsBar"></div>
   </div>
 
-  <!-- 📊 2. BI 視覺化圖表看板 (圓餅圖 + 南丁格爾玫瑰圖) -->
+  <!-- 📊 2. BI 視覺化圖表看板 (尺寸圓餅圖 + 城市玫瑰圖) -->
   <div class="charts-grid">
     <div class="card">
-      <div class="card-title">🥧 圓餅圖 - 各尺寸佔比 (%) 與件數</div>
+      <div class="card-title">🥧 尺寸圓餅圖 - 各尺寸佔比 (%) 與件數</div>
       <div id="pieChart" class="chart-box"></div>
     </div>
     <div class="card">
-      <div class="card-title">🌹 南丁格爾玫瑰圖 - 階梯量級分佈</div>
+      <div class="card-title">🌹 城市玫瑰圖 - 新竹 vs 台北分佈</div>
       <div id="roseChart" class="chart-box"></div>
     </div>
   </div>
 
-  <!-- 📊 3. BI 直方柱狀圖 (清楚比較各尺寸直觀件數) -->
+  <!-- 📊 3. BI 尺寸直方長條圖 -->
   <div class="card">
     <div class="card-title">📊 各尺寸需求件數長條圖 (直接標記件數)</div>
     <div id="barChart" class="chart-box-full"></div>
@@ -227,14 +235,25 @@
     </div>
   </div>
 
-  <!-- 輸入表單 -->
+  <!-- 輸入表單 (城市切換鈕) -->
   <div class="card" id="formCard">
     <div class="card-title" id="formTitle">✏️ 登記與修改尺寸</div>
     <form id="orderForm" onsubmit="saveEntry(event)">
       <input type="hidden" id="editIndex" value="-1">
-      <div style="margin-top: 8px;">
-        <label class="form-label" for="name">人員姓名 / 單位代稱 *</label>
-        <input type="text" id="name" class="input-text" placeholder="例如：大舅、三阿姨" required>
+      <input type="hidden" id="selectedCity" value="新竹">
+      
+      <div class="form-row">
+        <div>
+          <label class="form-label" for="name">人員姓名 / 單位代稱 *</label>
+          <input type="text" id="name" class="input-text" placeholder="例如：大舅、三阿姨" required>
+        </div>
+        <div>
+          <label class="form-label">所屬城市 (點選直接切換)</label>
+          <div class="city-picker">
+            <div class="city-btn active" id="btnCityHsinchu" onclick="selectCity('新竹')">📍 新竹</div>
+            <div class="city-btn" id="btnCityTaipei" onclick="selectCity('台北')">📍 台北</div>
+          </div>
+        </div>
       </div>
 
       <div style="margin-top: 10px;">
@@ -294,7 +313,7 @@
       <table class="desk-table">
         <thead>
           <tr>
-            <th>No</th><th>姓名</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2L</th><th>3L</th>
+            <th>No</th><th>姓名</th><th>城市</th><th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>2L</th><th>3L</th>
             <th>小計</th><th>備註說明</th><th>操作</th>
           </tr>
         </thead>
@@ -318,41 +337,55 @@
 // ⭐ 已直接綁定您專屬的 Google Apps Script 雲端網址
 const CLOUD_API = "https://script.google.com/macros/s/AKfycbzrfWSIeKgfvfLWNTwdr1rCJ7iKnP90Or4pv9cQLnxaWfLWwswZGQE4dSljLt5Ot4MC/exec";
 
-// 初始名單 (確保離線或首頁第一毫秒即有完整呈現)
+// 初始名單 (純新竹與台北)
 const defaultData = [
-  { name: "大舅", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "大阿姨", xs: 0, s: 0, m: 0, l: 1, xl: 2, l2: 0, l3: 0, notes: "L1 KL1" },
-  { name: "二阿姨", xs: 0, s: 0, m: 0, l: 0, xl: 2, l2: 1, l3: 4, notes: "XS1 M1 S2" },
-  { name: "三阿姨", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "M1" },
-  { name: "鄭滿月", xs: 0, s: 0, m: 0, l: 1, xl: 1, l2: 0, l3: 0, notes: "M1 XS2" },
-  { name: "鄭渭月", xs: 2, s: 3, m: 2, l: 1, xl: 3, l2: 1, l3: 0, notes: "" },
-  { name: "六阿姨", xs: 0, s: 2, m: 0, l: 3, xl: 0, l2: 2, l3: 0, notes: "L2 S1" },
-  { name: "湯立雄", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "鄭榮林", xs: 0, s: 0, m: 0, l: 0, xl: 1, l2: 0, l3: 0, notes: "" },
-  { name: "黃家榮", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "吳志雄", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "王春光", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "楊建德", xs: 0, s: 0, m: 1, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "蔡彥平", xs: 0, s: 0, m: 0, l: 0, xl: 1, l2: 0, l3: 0, notes: "M1" },
-  { name: "吳寶吉", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "蔡裕谷", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "鄭謝錦", xs: 0, s: 1, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "楊麗娥", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "鄭錦碧", xs: 0, s: 0, m: 2, l: 7, xl: 0, l2: 2, l3: 1, notes: "" },
-  { name: "台北",   xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" }
+  { name: "大舅", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "大阿姨", city: "新竹", xs: 0, s: 0, m: 0, l: 1, xl: 2, l2: 0, l3: 0, notes: "L1 KL1" },
+  { name: "二阿姨", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 2, l2: 1, l3: 4, notes: "XS1 M1 S2" },
+  { name: "三阿姨", city: "台北", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "M1" },
+  { name: "鄭滿月", city: "新竹", xs: 0, s: 0, m: 0, l: 1, xl: 1, l2: 0, l3: 0, notes: "M1 XS2" },
+  { name: "鄭渭月", city: "新竹", xs: 2, s: 3, m: 2, l: 1, xl: 3, l2: 1, l3: 0, notes: "" },
+  { name: "六阿姨", city: "新竹", xs: 0, s: 2, m: 0, l: 3, xl: 0, l2: 2, l3: 0, notes: "L2 S1" },
+  { name: "湯立雄", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "鄭榮林", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 1, l2: 0, l3: 0, notes: "" },
+  { name: "黃家榮", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "吳志雄", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "王春光", city: "新竹", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "楊建德", city: "新竹", xs: 0, s: 0, m: 1, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "蔡彥平", city: "台北", xs: 0, s: 0, m: 0, l: 0, xl: 1, l2: 0, l3: 0, notes: "M1" },
+  { name: "吳寶吉", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "蔡裕谷", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "鄭謝錦", city: "新竹", xs: 0, s: 1, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "楊麗娥", city: "新竹", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "鄭錦碧", city: "新竹", xs: 0, s: 0, m: 2, l: 7, xl: 0, l2: 2, l3: 1, notes: "" },
+  { name: "台北",   city: "台北", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" }
 ];
 
 let records = JSON.parse(localStorage.getItem("polo_backup")) || defaultData;
 let formSizes = { xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0 };
 
-// 初始化三大 BI 圖表
 const pieChart = echarts.init(document.getElementById('pieChart'));
 const roseChart = echarts.init(document.getElementById('roseChart'));
 const barChart = echarts.init(document.getElementById('barChart'));
 
 const colors = ['#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
+const cityColors = ['#2563eb', '#7c3aed']; // 新竹: 藍色, 台北: 紫色
 const sizeKeys = ['xs', 's', 'm', 'l', 'xl', 'l2', 'l3'];
 const sizeLabels = ['XS', 'S', 'M', 'L', 'XL', '2L', '3L'];
+
+// 切換城市按鈕
+function selectCity(city) {
+  document.getElementById("selectedCity").value = city;
+  const btnH = document.getElementById("btnCityHsinchu");
+  const btnT = document.getElementById("btnCityTaipei");
+  if (city === "新竹") {
+    btnH.className = "city-btn active";
+    btnT.className = "city-btn";
+  } else {
+    btnH.className = "city-btn";
+    btnT.className = "city-btn active taipei";
+  }
+}
 
 function setSyncStatus(state, msg) {
   const dot = document.getElementById("syncDot");
@@ -373,21 +406,29 @@ function toggleSpec() {
   }
 }
 
-// 繪製與即時更新三大 BI 圖表與指標
-function updateBIDashboard(stats, totalCount, peopleCount) {
-  // 1. 更新 KPI 指標卡
+function updateBIDashboard(stats, totalCount, peopleCount, cityStats) {
   document.getElementById("kpiTotal").innerText = totalCount;
   document.getElementById("kpiPeople").innerText = peopleCount;
   document.getElementById("kpiAvg").innerText = peopleCount > 0 ? `平均 ${(totalCount / peopleCount).toFixed(1)} 件/人` : '0 件/人';
 
-  // 計算最高與次高
   const sortedSizes = sizeKeys.map((k, idx) => ({ name: sizeLabels[idx], val: stats[k] })).sort((a, b) => b.val - a.val);
   document.getElementById("kpiTopSize").innerText = sortedSizes[0].val > 0 ? sortedSizes[0].name : '-';
   document.getElementById("kpiTopSizeCount").innerText = sortedSizes[0].val > 0 ? `${sortedSizes[0].val} 件` : '0 件';
-  document.getElementById("kpiSecSize").innerText = sortedSizes[1].val > 0 ? sortedSizes[1].name : '-';
-  document.getElementById("kpiSecSizeCount").innerText = sortedSizes[1].val > 0 ? `${sortedSizes[1].val} 件` : '0 件';
 
-  // 2. 渲染各尺寸彩色速查牌
+  const hCount = cityStats["新竹"] || 0;
+  const tCount = cityStats["台北"] || 0;
+  if (hCount >= tCount && hCount > 0) {
+    document.getElementById("kpiTopCity").innerText = "新竹";
+    document.getElementById("kpiTopCityCount").innerText = `${hCount} 件`;
+  } else if (tCount > hCount) {
+    document.getElementById("kpiTopCity").innerText = "台北";
+    document.getElementById("kpiTopCityCount").innerText = `${tCount} 件`;
+  } else {
+    document.getElementById("kpiTopCity").innerText = "-";
+    document.getElementById("kpiTopCityCount").innerText = `0 件`;
+  }
+
+  // 尺寸彩色速查牌
   const chipsBar = document.getElementById("sizeChipsBar");
   chipsBar.innerHTML = sizeLabels.map((lbl, idx) => `
     <div class="size-badge">
@@ -396,10 +437,8 @@ function updateBIDashboard(stats, totalCount, peopleCount) {
     </div>
   `).join('');
 
-  // 準備圖表資料 (只取有件數的顯示扇區，避免標籤重疊)
+  // 圖表 1：尺寸圓餅圖
   const chartData = sizeLabels.map((lbl, idx) => ({ name: lbl, value: stats[sizeKeys[idx]] })).filter(d => d.value > 0);
-
-  // BI 圖表 1：圓餅圖 (直拉標註 百分比與件數)
   pieChart.setOption({
     color: colors,
     tooltip: { trigger: 'item', formatter: '{b} 號: {c} 件 ({d}%)' },
@@ -421,37 +460,39 @@ function updateBIDashboard(stats, totalCount, peopleCount) {
     }]
   });
 
-  // BI 圖表 2：南丁格爾玫瑰圖 (極座標半徑拉伸)
+  // ⭐ 圖表 2：南丁格爾玫瑰圖 (新竹 vs 台北)
+  const roseCityData = [
+    { name: "新竹", value: hCount },
+    { name: "台北", value: tCount }
+  ].filter(d => d.value > 0);
+
   roseChart.setOption({
-    color: colors,
-    tooltip: { trigger: 'item', formatter: '{b} 號: {c} 件' },
+    color: cityColors,
+    tooltip: { trigger: 'item', formatter: '📍 {b}: {c} 件 ({d}%)' },
     series: [{
+      name: '城市需求分佈',
       type: 'pie',
-      radius: ['18%', '68%'],
+      radius: ['20%', '70%'],
       center: ['50%', '50%'],
       roseType: 'radius',
       itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
       label: {
         show: true,
-        formatter: '{b}: {c}件',
-        fontSize: 11,
+        formatter: '{b}\n{c} 件 ({d}%)',
+        fontSize: 12,
         fontWeight: 'bold',
         color: '#0f172a'
       },
-      labelLine: { length: 6, length2: 6 },
-      data: chartData
+      labelLine: { length: 8, length2: 6 },
+      data: roseCityData
     }]
   });
 
-  // BI 圖表 3：尺寸長條圖 (柱頂直接標記件數)
+  // 圖表 3：尺寸長條圖
   barChart.setOption({
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     grid: { top: '30px', left: '10px', right: '15px', bottom: '10px', containLabel: true },
-    xAxis: {
-      type: 'category',
-      data: sizeLabels,
-      axisLabel: { fontWeight: 'bold' }
-    },
+    xAxis: { type: 'category', data: sizeLabels, axisLabel: { fontWeight: 'bold' } },
     yAxis: { type: 'value', minInterval: 1 },
     series: [{
       name: '需求件數',
@@ -481,10 +522,15 @@ function render() {
 
   let totalCount = 0;
   let stats = { xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0 };
+  let cityStats = { "新竹": 0, "台北": 0 };
 
   records.forEach((row, idx) => {
     const rowTotal = (row.xs||0)+(row.s||0)+(row.m||0)+(row.l||0)+(row.xl||0)+(row.l2||0)+(row.l3||0);
     totalCount += rowTotal;
+
+    // 歸納城市（只分新竹與台北）
+    const rowCity = (row.city === "台北") ? "台北" : "新竹";
+    cityStats[rowCity] += rowTotal;
 
     sizeKeys.forEach(k => stats[k] += (row[k] || 0));
 
@@ -493,12 +539,15 @@ function render() {
       if (row[k] > 0) chips += `<span class="chip">${sizeLabels[i]}: ${row[k]}</span> `;
     });
 
+    const isTaipei = (rowCity === "台北");
+    const cityClass = isTaipei ? "city-tag taipei" : "city-tag hsinchu";
+
     // 手機卡片
     const card = document.createElement("div");
     card.className = "person-card";
     card.innerHTML = `
       <div class="person-top">
-        <span>${idx + 1}. ${escapeHtml(row.name)}</span>
+        <span>${idx + 1}. ${escapeHtml(row.name)} <span class="${cityClass}">📍 ${rowCity}</span></span>
         <span style="color:var(--primary); font-size:13px;">${rowTotal > 0 ? `共 ${rowTotal} 件` : '未登記'}</span>
       </div>
       <div>${chips || '<span style="color:#94a3b8;font-size:12px;">無尺寸資料</span>'}</div>
@@ -515,6 +564,7 @@ function render() {
     tr.innerHTML = `
       <td>${idx + 1}</td>
       <td style="font-weight:700;">${escapeHtml(row.name)}</td>
+      <td><span class="${cityClass}">📍 ${rowCity}</span></td>
       <td>${row.xs || "-"}</td><td>${row.s || "-"}</td><td>${row.m || "-"}</td>
       <td>${row.l || "-"}</td><td>${row.xl || "-"}</td><td>${row.l2 || "-"}</td><td>${row.l3 || "-"}</td>
       <td style="font-weight:800; color:var(--primary);">${rowTotal || "-"}</td>
@@ -531,11 +581,9 @@ function render() {
   document.getElementById("statBottomSummary").innerText = `L:${stats.l} / XL:${stats.xl} / M:${stats.m} / 2L:${stats.l2}`;
   document.getElementById("peopleCount").innerText = records.length;
 
-  // 即刻刷新 BI 看板
-  updateBIDashboard(stats, totalCount, records.length);
+  updateBIDashboard(stats, totalCount, records.length, cityStats);
 }
 
-// 雲端載入 (含防快取機制)
 async function loadFromCloud() {
   setSyncStatus("syncing", "正在同步 Google 雲端資料庫...");
   try {
@@ -546,6 +594,7 @@ async function loadFromCloud() {
       if (Array.isArray(data) && data.length > 0) {
         records = data.map(item => ({
           name: String(item.name || "").trim(),
+          city: (String(item.city || "").trim() === "台北") ? "台北" : "新竹",
           xs: Number(item.xs) || 0,
           s: Number(item.s) || 0,
           m: Number(item.m) || 0,
@@ -606,6 +655,7 @@ async function saveEntry(e) {
 
   const entry = {
     name: document.getElementById("name").value.trim(),
+    city: document.getElementById("selectedCity").value || "新竹",
     xs: formSizes.xs, s: formSizes.s, m: formSizes.m, l: formSizes.l,
     xl: formSizes.xl, l2: formSizes.l2, l3: formSizes.l3,
     notes: document.getElementById("notes").value.trim()
@@ -626,6 +676,7 @@ function editRow(index) {
   const row = records[index];
   document.getElementById("editIndex").value = index;
   document.getElementById("name").value = row.name;
+  selectCity(row.city || "新竹");
   document.getElementById("notes").value = row.notes || "";
   sizeKeys.forEach(k => setFormQty(k, row[k]));
 
@@ -641,6 +692,7 @@ function resetForm() {
   document.getElementById("formTitle").innerText = "✏️ 登記與修改尺寸";
   document.getElementById("submitBtn").innerText = "儲存並同步至雲端";
   document.getElementById("cancelBtn").style.display = "none";
+  selectCity("新竹");
   sizeKeys.forEach(k => setFormQty(k, 0));
 }
 
@@ -658,10 +710,10 @@ function scrollToForm() {
 }
 
 function exportToCSV() {
-  let csv = "\uFEFFNo,姓名,XS,S,M,L,XL,2L,3L,小計,備註說明\n";
+  let csv = "\uFEFFNo,姓名,城市,XS,S,M,L,XL,2L,3L,小計,備註說明\n";
   records.forEach((r, idx) => {
     const total = (r.xs||0)+(r.s||0)+(r.m||0)+(r.l||0)+(r.xl||0)+(r.l2||0)+(r.l3||0);
-    csv += `${idx + 1},"${r.name.replace(/"/g, '""')}",${r.xs||0},${r.s||0},${r.m||0},${r.l||0},${r.xl||0},${r.l2||0},${r.l3||0},${total},"${(r.notes||"").replace(/"/g, '""')}"\n`;
+    csv += `${idx + 1},"${r.name.replace(/"/g, '""')}","${(r.city||"新竹").replace(/"/g, '""')}",${r.xs||0},${r.s||0},${r.m||0},${r.l||0},${r.xl||0},${r.l2||0},${r.l3||0},${total},"${(r.notes||"").replace(/"/g, '""')}"\n`;
   });
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
@@ -680,10 +732,7 @@ window.addEventListener('resize', () => {
   barChart.resize();
 });
 
-// ⭐ 啟動第一毫秒即渲染 BI 圖表（避免等待網路連線而畫面留白）
 render();
-
-// 背景拉取 Google 試算表最新資料
 loadFromCloud();
 </script>
 
