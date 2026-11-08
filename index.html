@@ -23,16 +23,14 @@
     body { background-color: var(--bg); color: var(--text); padding-bottom: 95px; }
     .container { max-width: 1080px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
 
-    /* 頂部同步狀態與操作列 */
-    .sync-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    /* 頂部同步狀態 */
+    .sync-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
     .sync-status { display: flex; align-items: center; gap: 8px; }
     .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
     .dot.green { background: #22c55e; }
     .dot.yellow { background: #eab308; animation: blink 1s infinite; }
     .dot.red { background: #ef4444; }
     @keyframes blink { 50% { opacity: 0.3; } }
-
-    .sync-actions { display: flex; gap: 8px; }
 
     .app-header { background: white; padding: 18px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
     .app-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px; }
@@ -68,7 +66,7 @@
     .input-text { width: 100%; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; outline: none; background: #fff; }
     .input-text:focus { border-color: var(--primary); }
 
-    /* 城市單選按鈕 */
+    /* 城市按鈕點選器 */
     .city-picker { display: flex; gap: 8px; height: 44px; }
     .city-btn { flex: 1; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #f8fafc; font-size: 14px; font-weight: 700; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; user-select: none; }
     .city-btn:active { transform: scale(0.96); }
@@ -93,7 +91,6 @@
     .btn-secondary { background: #f1f5f9; color: #475569; flex: 0.4; }
     .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; font-weight: 600; }
     .btn-sm.del { color: var(--danger); border-color: #fecaca; }
-    .btn-sm.highlight { background: #16a34a; color: white; border-color: #15803d; }
 
     /* 名冊列表 */
     .roster-cards { display: flex; flex-direction: column; gap: 8px; }
@@ -131,16 +128,13 @@
 
 <div class="container">
 
-  <!-- 頂部同步狀態 -->
+  <!-- 頂部同步狀態列 -->
   <div class="sync-bar">
     <div class="sync-status">
       <span class="dot green" id="syncDot"></span>
       <span id="syncText">Google 試算表連線就緒</span>
     </div>
-    <div class="sync-actions">
-      <button class="btn-sm highlight" onclick="forcePushToCloud()">📤 覆蓋推送至試算表</button>
-      <button class="btn-sm" onclick="loadFromCloud()">🔄 從試算表重新整理</button>
-    </div>
+    <button class="btn-sm" onclick="loadFromCloud()">🔄 從試算表重新整理</button>
   </div>
 
   <div class="app-header">
@@ -241,7 +235,7 @@
     </div>
   </div>
 
-  <!-- 輸入表單 -->
+  <!-- 輸入表單 (城市切換鈕) -->
   <div class="card" id="formCard">
     <div class="card-title" id="formTitle">✏️ 登記與修改尺寸</div>
     <form id="orderForm" onsubmit="saveEntry(event)">
@@ -345,26 +339,10 @@ const CLOUD_API = "https://script.google.com/macros/s/AKfycbzrfWSIeKgfvfLWNTwdr1
 
 // 備用初始名單
 const defaultData = [
-  { name: "大舅", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "大阿姨", city: "新竹", xs: 0, s: 0, m: 0, l: 1, xl: 2, l2: 0, l3: 0, notes: "L1 KL1" },
-  { name: "二阿姨", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 2, l2: 1, l3: 4, notes: "XS1 M1 S2" },
-  { name: "三阿姨", city: "台北", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "M1" },
-  { name: "鄭滿月", city: "新竹", xs: 0, s: 0, m: 0, l: 1, xl: 1, l2: 0, l3: 0, notes: "M1 XS2" },
-  { name: "鄭渭月", city: "新竹", xs: 2, s: 3, m: 2, l: 1, xl: 3, l2: 1, l3: 0, notes: "" },
-  { name: "六阿姨", city: "新竹", xs: 0, s: 2, m: 0, l: 3, xl: 0, l2: 2, l3: 0, notes: "L2 S1" },
-  { name: "湯立雄", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "鄭榮林", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 1, l2: 0, l3: 0, notes: "" },
-  { name: "黃家榮", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "吳志雄", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "王春光", city: "新竹", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "楊建德", city: "新竹", xs: 0, s: 0, m: 1, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "蔡彥平", city: "台北", xs: 0, s: 0, m: 0, l: 0, xl: 1, l2: 0, l3: 0, notes: "M1" },
-  { name: "吳寶吉", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "蔡裕谷", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "鄭謝錦", city: "新竹", xs: 0, s: 1, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "楊麗娥", city: "新竹", xs: 0, s: 0, m: 0, l: 1, xl: 0, l2: 0, l3: 0, notes: "" },
-  { name: "鄭錦碧", city: "新竹", xs: 0, s: 0, m: 2, l: 7, xl: 0, l2: 2, l3: 1, notes: "" },
-  { name: "台北",   city: "台北", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" }
+  { name: "張萬渭", city: "新竹", xs: 0, s: 0, m: 1, l: 0, xl: 1, l2: 0, l3: 0, notes: "" },
+  { name: "鄭萬來", city: "新竹", xs: 0, s: 0, m: 2, l: 0, xl: 1, l2: 0, l3: 0, notes: "" },
+  { name: "蔡文祥", city: "新竹", xs: 0, s: 0, m: 1, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
+  { name: "三阿姨", city: "台北", xs: 0, s: 0, m: 1, l: 1, xl: 0, l2: 0, l3: 0, notes: "" }
 ];
 
 let records = JSON.parse(localStorage.getItem("polo_backup")) || defaultData;
@@ -379,7 +357,7 @@ const cityColors = ['#2563eb', '#7c3aed'];
 const sizeKeys = ['xs', 's', 'm', 'l', 'xl', 'l2', 'l3'];
 const sizeLabels = ['XS', 'S', 'M', 'L', 'XL', '2L', '3L'];
 
-// ⭐ 超強智慧辨識核心：無論 Google 試算表欄位是中文、英文大小寫、2L/3L 還是橫線 "-"，通通完美辨識！
+// ⭐ 超強智慧辨識核心：中英文大小寫自動對齊、自動去除橫線 "-"
 function parseCloudRow(item) {
   const c = {};
   for (let k in item) {
@@ -388,14 +366,10 @@ function parseCloudRow(item) {
     }
   }
 
-  // 1. 姓名辨識 (支援 姓名, name, 人員)
   const name = c['姓名'] || c['name'] || c['人員姓名'] || c['單位'] || '';
-
-  // 2. 城市辨識 (支援 城市, city, 地區)
   const rawCity = String(c['城市'] || c['city'] || c['地區'] || '新竹').trim();
   const city = rawCity.includes('台北') ? '台北' : '新竹';
 
-  // 3. 數字解析工具 (自動濾除空格、去除橫線 "-"、處理文字型數字)
   const getNum = (...keys) => {
     for (let k of keys) {
       if (c[k] !== undefined && c[k] !== null) {
@@ -416,8 +390,8 @@ function parseCloudRow(item) {
   const m  = getNum('m');
   const l  = getNum('l');
   const xl = getNum('xl');
-  const l2 = getNum('2l', 'l2', '2x', 'xxl'); // 支援 2L, l2
-  const l3 = getNum('3l', 'l3', '3x', 'xxxl'); // 支援 3L, l3
+  const l2 = getNum('2l', 'l2', '2x', 'xxl');
+  const l3 = getNum('3l', 'l3', '3x', 'xxxl');
   const notes = c['備註'] || c['備註說明'] || c['notes'] || '';
 
   return { name, city, xs, s, m, l, xl, l2, l3, notes };
@@ -622,26 +596,6 @@ async function loadFromCloud() {
     console.error(err);
   }
   render();
-}
-
-// 覆蓋推送到 Google 試算表
-async function forcePushToCloud() {
-  if (!confirm(`確定要將目前畫面的 ${records.length} 筆資料推送到 Google 試算表覆蓋更新嗎？`)) return;
-  setSyncStatus("syncing", "正在寫入 Google 試算表...");
-  try {
-    await fetch(CLOUD_API, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(records)
-    });
-    localStorage.setItem("polo_backup", JSON.stringify(records));
-    setSyncStatus("ok", "🟢 已成功儲存至 Google 試算表");
-    alert(`🎉 成功！已將 ${records.length} 筆資料完整寫入 Google 試算表！`);
-  } catch (err) {
-    console.error(err);
-    alert("儲存失敗，請檢查網路連線。");
-  }
 }
 
 async function syncToCloud() {
