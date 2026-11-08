@@ -23,16 +23,14 @@
     body { background-color: var(--bg); color: var(--text); padding-bottom: 95px; }
     .container { max-width: 1080px; margin: 0 auto; padding: 12px; display: flex; flex-direction: column; gap: 14px; }
 
-    /* 頂部同步狀態與操作列 */
-    .sync-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+    /* 頂部同步狀態 */
+    .sync-bar { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
     .sync-status { display: flex; align-items: center; gap: 8px; }
     .dot { width: 9px; height: 9px; border-radius: 50%; background: #94a3b8; }
     .dot.green { background: #22c55e; }
     .dot.yellow { background: #eab308; animation: blink 1s infinite; }
     .dot.red { background: #ef4444; }
     @keyframes blink { 50% { opacity: 0.3; } }
-
-    .sync-actions { display: flex; gap: 8px; }
 
     .app-header { background: white; padding: 18px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
     .app-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-bottom: 6px; }
@@ -68,7 +66,7 @@
     .input-text { width: 100%; padding: 11px 12px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; outline: none; background: #fff; }
     .input-text:focus { border-color: var(--primary); }
 
-    /* 城市按鈕點選器 */
+    /* ⭐ 城市按鈕點選器 (Segmented Radio Buttons) */
     .city-picker { display: flex; gap: 8px; height: 44px; }
     .city-btn { flex: 1; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #f8fafc; font-size: 14px; font-weight: 700; color: #475569; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.15s; user-select: none; }
     .city-btn:active { transform: scale(0.96); }
@@ -93,7 +91,6 @@
     .btn-secondary { background: #f1f5f9; color: #475569; flex: 0.4; }
     .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; font-weight: 600; }
     .btn-sm.del { color: var(--danger); border-color: #fecaca; }
-    .btn-sm.highlight { background: #16a34a; color: white; border-color: #15803d; }
 
     /* 名冊列表 */
     .roster-cards { display: flex; flex-direction: column; gap: 8px; }
@@ -131,17 +128,13 @@
 
 <div class="container">
 
-  <!-- 頂部同步狀態與強制推送操作 -->
+  <!-- 頂部同步狀態 -->
   <div class="sync-bar">
     <div class="sync-status">
       <span class="dot green" id="syncDot"></span>
-      <span id="syncText">Google 試算表連線就緒</span>
+      <span id="syncText">正在連線 Google 雲端試算表...</span>
     </div>
-    <div class="sync-actions">
-      <!-- 🌟 強制覆蓋推送到 Google 試算表按鈕 -->
-      <button class="btn-sm highlight" onclick="forcePushToCloud()">📤 將目前畫面資料覆蓋同步至試算表</button>
-      <button class="btn-sm" onclick="loadFromCloud()">🔄 從試算表重新整理</button>
-    </div>
+    <button class="btn-sm" onclick="loadFromCloud()">🔄 重新整理</button>
   </div>
 
   <div class="app-header">
@@ -242,7 +235,7 @@
     </div>
   </div>
 
-  <!-- 輸入表單 -->
+  <!-- 輸入表單 (城市切換鈕) -->
   <div class="card" id="formCard">
     <div class="card-title" id="formTitle">✏️ 登記與修改尺寸</div>
     <form id="orderForm" onsubmit="saveEntry(event)">
@@ -303,7 +296,7 @@
       </div>
 
       <div style="display: flex; gap: 8px; margin-top: 14px;">
-        <button type="submit" class="btn btn-primary" id="submitBtn">儲存單筆並同步至雲端</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">儲存並同步至雲端</button>
         <button type="button" class="btn btn-secondary" id="cancelBtn" onclick="resetForm()" style="display:none;">取消</button>
       </div>
     </form>
@@ -344,7 +337,7 @@
 // ⭐ 已直接綁定您專屬的 Google Apps Script 雲端網址
 const CLOUD_API = "https://script.google.com/macros/s/AKfycbzrfWSIeKgfvfLWNTwdr1rCJ7iKnP90Or4pv9cQLnxaWfLWwswZGQE4dSljLt5Ot4MC/exec";
 
-// 初始名單
+// 初始名單 (純新竹與台北)
 const defaultData = [
   { name: "大舅", city: "新竹", xs: 0, s: 0, m: 0, l: 0, xl: 0, l2: 0, l3: 0, notes: "" },
   { name: "大阿姨", city: "新竹", xs: 0, s: 0, m: 0, l: 1, xl: 2, l2: 0, l3: 0, notes: "L1 KL1" },
@@ -376,10 +369,11 @@ const roseChart = echarts.init(document.getElementById('roseChart'));
 const barChart = echarts.init(document.getElementById('barChart'));
 
 const colors = ['#6366f1', '#3b82f6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
-const cityColors = ['#2563eb', '#7c3aed'];
+const cityColors = ['#2563eb', '#7c3aed']; // 新竹: 藍色, 台北: 紫色
 const sizeKeys = ['xs', 's', 'm', 'l', 'xl', 'l2', 'l3'];
 const sizeLabels = ['XS', 'S', 'M', 'L', 'XL', '2L', '3L'];
 
+// 切換城市按鈕
 function selectCity(city) {
   document.getElementById("selectedCity").value = city;
   const btnH = document.getElementById("btnCityHsinchu");
@@ -434,6 +428,7 @@ function updateBIDashboard(stats, totalCount, peopleCount, cityStats) {
     document.getElementById("kpiTopCityCount").innerText = `0 件`;
   }
 
+  // 尺寸彩色速查牌
   const chipsBar = document.getElementById("sizeChipsBar");
   chipsBar.innerHTML = sizeLabels.map((lbl, idx) => `
     <div class="size-badge">
@@ -442,6 +437,7 @@ function updateBIDashboard(stats, totalCount, peopleCount, cityStats) {
     </div>
   `).join('');
 
+  // 圖表 1：尺寸圓餅圖
   const chartData = sizeLabels.map((lbl, idx) => ({ name: lbl, value: stats[sizeKeys[idx]] })).filter(d => d.value > 0);
   pieChart.setOption({
     color: colors,
@@ -452,12 +448,19 @@ function updateBIDashboard(stats, totalCount, peopleCount, cityStats) {
       center: ['50%', '50%'],
       avoidLabelOverlap: true,
       itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
-      label: { show: true, formatter: '{b}\n{c}件 ({d}%)', fontSize: 11, fontWeight: 'bold', color: '#1e293b' },
+      label: {
+        show: true,
+        formatter: '{b}\n{c}件 ({d}%)',
+        fontSize: 11,
+        fontWeight: 'bold',
+        color: '#1e293b'
+      },
       labelLine: { length: 8, length2: 6 },
       data: chartData
     }]
   });
 
+  // ⭐ 圖表 2：南丁格爾玫瑰圖 (新竹 vs 台北)
   const roseCityData = [
     { name: "新竹", value: hCount },
     { name: "台北", value: tCount }
@@ -473,12 +476,19 @@ function updateBIDashboard(stats, totalCount, peopleCount, cityStats) {
       center: ['50%', '50%'],
       roseType: 'radius',
       itemStyle: { borderRadius: 6, borderColor: '#fff', borderWidth: 2 },
-      label: { show: true, formatter: '{b}\n{c} 件 ({d}%)', fontSize: 12, fontWeight: 'bold', color: '#0f172a' },
+      label: {
+        show: true,
+        formatter: '{b}\n{c} 件 ({d}%)',
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#0f172a'
+      },
       labelLine: { length: 8, length2: 6 },
       data: roseCityData
     }]
   });
 
+  // 圖表 3：尺寸長條圖
   barChart.setOption({
     tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
     grid: { top: '30px', left: '10px', right: '15px', bottom: '10px', containLabel: true },
@@ -488,8 +498,18 @@ function updateBIDashboard(stats, totalCount, peopleCount, cityStats) {
       name: '需求件數',
       type: 'bar',
       barWidth: '40%',
-      data: sizeKeys.map((k, i) => ({ value: stats[k], itemStyle: { color: colors[i], borderRadius: [6, 6, 0, 0] } })),
-      label: { show: true, position: 'top', formatter: '{c} 件', fontSize: 12, fontWeight: 'bold', color: '#1e293b' }
+      data: sizeKeys.map((k, i) => ({
+        value: stats[k],
+        itemStyle: { color: colors[i], borderRadius: [6, 6, 0, 0] }
+      })),
+      label: {
+        show: true,
+        position: 'top',
+        formatter: '{c} 件',
+        fontSize: 12,
+        fontWeight: 'bold',
+        color: '#1e293b'
+      }
     }]
   });
 }
@@ -508,6 +528,7 @@ function render() {
     const rowTotal = (row.xs||0)+(row.s||0)+(row.m||0)+(row.l||0)+(row.xl||0)+(row.l2||0)+(row.l3||0);
     totalCount += rowTotal;
 
+    // 歸納城市（只分新竹與台北）
     const rowCity = (row.city === "台北") ? "台北" : "新竹";
     cityStats[rowCity] += rowTotal;
 
@@ -521,6 +542,7 @@ function render() {
     const isTaipei = (rowCity === "台北");
     const cityClass = isTaipei ? "city-tag taipei" : "city-tag hsinchu";
 
+    // 手機卡片
     const card = document.createElement("div");
     card.className = "person-card";
     card.innerHTML = `
@@ -537,6 +559,7 @@ function render() {
     `;
     mobileContainer.appendChild(card);
 
+    // 電腦表格
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${idx + 1}</td>
@@ -561,27 +584,6 @@ function render() {
   updateBIDashboard(stats, totalCount, records.length, cityStats);
 }
 
-// 🌟 強制將目前所有資料覆蓋推送到 Google 試算表
-async function forcePushToCloud() {
-  if (!confirm(`確定要將目前畫面的 ${records.length} 筆資料全部推送到 Google 試算表嗎？`)) return;
-  setSyncStatus("syncing", "正在寫入 Google 試算表...");
-  try {
-    await fetch(CLOUD_API, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify(records)
-    });
-    localStorage.setItem("polo_backup", JSON.stringify(records));
-    setSyncStatus("ok", "🟢 已成功儲存至 Google 試算表");
-    alert(`🎉 成功！已將 ${records.length} 筆資料完整寫入 Google 試算表！請開啟試算表查看。`);
-  } catch (err) {
-    console.error(err);
-    setSyncStatus("fail", "儲存失敗，請確認網路連線");
-    alert("儲存失敗，請檢查網路連線。");
-  }
-}
-
 async function loadFromCloud() {
   setSyncStatus("syncing", "正在同步 Google 雲端資料庫...");
   try {
@@ -604,10 +606,15 @@ async function loadFromCloud() {
         }));
         localStorage.setItem("polo_backup", JSON.stringify(records));
         setSyncStatus("ok", "🟢 雲端同步完成 (最新資料)");
+      } else {
+        await syncToCloud();
       }
+    } else {
+      throw new Error("HTTP 狀態: " + res.status);
     }
   } catch (err) {
     console.error(err);
+    setSyncStatus("fail", "連線異常，顯示目前備援名單");
   }
   render();
 }
@@ -683,7 +690,7 @@ function resetForm() {
   document.getElementById("orderForm").reset();
   document.getElementById("editIndex").value = -1;
   document.getElementById("formTitle").innerText = "✏️ 登記與修改尺寸";
-  document.getElementById("submitBtn").innerText = "儲存單筆並同步至雲端";
+  document.getElementById("submitBtn").innerText = "儲存並同步至雲端";
   document.getElementById("cancelBtn").style.display = "none";
   selectCity("新竹");
   sizeKeys.forEach(k => setFormQty(k, 0));
